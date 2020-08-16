@@ -1,0 +1,6 @@
+FROM java:8
+MAINTAINER LYL232 <3183246942@qq.com>
+VOLUME /tmp
+ADD ./backend/target/jakgd-0.0.1-SNAPSHOT.jar /jakgd/jakgd.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/jakgd/jakgd.jar"]

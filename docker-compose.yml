@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  'neo4j.db':
+    image: neo4j:3.5
+    restart: always
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/var/lib/neo4j/logs
+    ports:
+      - 7474:7474
+      - 7687:7687
+    expose:
+      - 7474
+      - 7687
+    environment:
+      - NEO4J_dbms_memory_heap_maxSize=4G
+      - NEO4J_AUTH=neo4j/123456  #修改默认用户密码
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_shell_enabled=true
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:6477
+      - NEO4J_dbms_connector_bolt_listen__address=:7687
+
+  backend:
+    restart: always
+    build: 
+      context: .
+      dockerfile: Dockerfiles/backend
+    container_name: backend
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    volumes:
+      - ./media:/jakgd/media
+      - ./backend/target/jakgd-0.0.1-SNAPSHOT.jar:/jakgd/jakgd.jar
+      - ./backend/src/main/resources/application.yml:/jakgd/application.yml
+    depends_on:
+      - 'neo4j.db'
+
+  frontend:
+    restart: always
+    build: 
+      context: .
+      dockerfile: Dockerfiles/frontend
+    ports:
+      - 80:80
+      - 443:443
+    expose:
+      - 80
+      - 443
+    volumes:
+      - ./static:/jakgd/static:ro
+      - ./media:/jakgd/media:ro
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+#      - ./nginx/ssl/server.crt:/etc/nginx/ssl/server.crt
+#      - ./nginx/ssl/server.key:/etc/nginx/ssl/server.key
+    depends_on:
+      - backend

@@ -1,0 +1,26 @@
+server:
+  port: 8080
+spring:
+  data:
+    neo4j:
+      uri: 'bolt://neo4j.db:7687'
+      username: 'neo4j'
+      password: '123456'
+      connection:
+        pool:
+          size: 32
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      enabled: false
+# jwt秘钥, 必须保密
+jwt-secret: 'JAKGD'
+# 是否允许注册
+enable-sign-up: true
+# 每次请求修改最大属性数
+max-properties-count: 128
+# 最大属性长度
+max-property-length: 1024
+upload:
+  # 上传文件的路径
+  path: '/jakgd/media'
