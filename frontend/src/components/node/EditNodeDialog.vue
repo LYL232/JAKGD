@@ -163,12 +163,6 @@ export default {
             }
           }
         })
-      } else {
-        if (this.form.nodeBaseType) {
-          this.tags = [this.form.nodeBaseType]
-        } else {
-          this.tags = []
-        }
       }
       this.visible = true
     },
@@ -181,17 +175,17 @@ export default {
 
       this.loading = true
 
-      let requestUrl = '/node/'
+      let requestUrl = '/api/node/'
 
       if (this.node) {
         for (let label of this.node.labels) {
           switch (label) {
           case '__knowledge': {
-            requestUrl = '/knowledge/'
+            requestUrl = '/api/knowledge/'
             break
           }
           }
-          if (requestUrl !== '/node/') {
+          if (requestUrl !== '/api/node/') {
             break
           }
         }
@@ -199,7 +193,7 @@ export default {
       } else {
         switch (this.form.nodeBaseType) {
         case '__knowledge': {
-          requestUrl = '/knowledge/'
+          requestUrl = '/api/knowledge/'
           break
         }
         }
@@ -272,6 +266,7 @@ export default {
       this.newPropertyName = ''
       this.$refs.propertyEditor.clearInput()
       this.form.nodeBaseType = ''
+      this.tags = []
     },
 
     requestFailed(err) {

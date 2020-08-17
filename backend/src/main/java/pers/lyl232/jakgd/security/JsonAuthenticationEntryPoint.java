@@ -29,7 +29,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
             BriefJSONResponse res = new BriefJSONResponse(
                     BriefJSONResponse.Code.UNAUTHORIZED,
                     "authorize failed");
-            e.printStackTrace();
             response.setStatus(res.responseEntity.getStatusCodeValue());
             response.getWriter().print(res.responseEntity.getBody());
         } else {

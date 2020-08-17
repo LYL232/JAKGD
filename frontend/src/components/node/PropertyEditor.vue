@@ -7,8 +7,8 @@
                 v-model="item.value" :maxlength="item.maxLength" show-word-limit/>
       <el-input v-if="item.type === 'textarea'"
                 :style="item.deletable ? 'width: 75%' : 'width: 100%'" type="textarea"
-                v-model="item.value" :maxlength="item.maxLength" show-word-limit
-                :autosize="{ minRows: 2, maxRows: 4}"/>
+                v-model="item.value" :maxlength="item.maxLength"
+                :autosize="{ minRows: 4, maxRows: 6}"/>
       <el-button v-if="item.deletable" type="primary" size="small" style="float: right"
                  @click.prevent="removePropertyInput(item.name)"
                  icon="el-icon-delete"/>

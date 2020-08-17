@@ -94,7 +94,6 @@ public class BaseController {
             Map<String, Object> body, Pattern validPattern)
             throws ExceptionWithBriefJSONResponse {
         Object object = body.get("labels");
-        logger.info("object class" + object.getClass());
         if (!(object instanceof List<?>)) {
             return new HashSet<>();
         }
