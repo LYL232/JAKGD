@@ -7,9 +7,6 @@ services:
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/var/lib/neo4j/logs
-    ports:
-      - 7474:7474
-      - 7687:7687
     expose:
       - 7474
       - 7687
