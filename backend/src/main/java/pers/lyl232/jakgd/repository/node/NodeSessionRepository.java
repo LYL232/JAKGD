@@ -150,7 +150,7 @@ public class NodeSessionRepository extends BaseSessionRepository {
         }
 
         StringBuilder query = new StringBuilder(
-                String.format("match (n) where id(n) = %d", node.id));
+                String.format("match (n) where id(n) = %d ", node.id));
 
         if (!setLabels.isEmpty()) {
             query.append("set n").append(getLabelStatement(setLabels));
