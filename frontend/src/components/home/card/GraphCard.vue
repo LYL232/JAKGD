@@ -7,7 +7,7 @@
                      @click="nodeSelected = null" size="mini" circle
                      v-if="nodeSelected"></el-button>
           <h3 v-if="nodeSelected" style="display: inline">
-            ({{nodeSelected.id}}){{nodeSelected.properties.name}}
+            {{util.getNodeTitle(nodeSelected)}}
           </h3>
           <h3 v-if="!nodeSelected">()</h3>
         </el-col>
@@ -286,7 +286,7 @@ export default {
 
     },
     addNodeViewTab(node) {
-      this.bus.$emit('newTab', {type: 'node-view', node: node,})
+      this.bus.$emit('newTab', {type: 'node-view', node: node})
     },
     clickDeleteButton() {
       this.$confirm('永久删除该节点, 需要先删除其所有的关系和附属文档, 是否继续?', '提示', {

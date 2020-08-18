@@ -6,6 +6,9 @@ export default {
    */
   getNodeTitle(node) {
     let name = node.properties.name
+    if (!name) {
+      name = node.properties['名字']
+    }
     return '(' + node.id + ')' + (name ? name : '')
   },
   /**

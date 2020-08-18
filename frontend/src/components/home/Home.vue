@@ -115,7 +115,7 @@ export default {
         break
       }
       case 'md-editor': {
-        tabData.label = this.util.getNodeTitle(this.node) + '.' + tabData.doc.name
+        tabData.label = this.util.getNodeTitle(tabData.node) + '.' + tabData.doc.name
         tabData.header = '编辑文档:' + tabData.label
         break
       }
