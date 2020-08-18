@@ -195,7 +195,7 @@ export default {
             cardData: data,
             cardTitle: this.searchString !== '' ? '搜索结果: ' + this.searchString : '',
           }
-        if (totLength > 100) {
+        if (totLength > 50) {
           newHomeCard.cardType = 'graph-data-table'
         } else {
           newHomeCard.cardType = 'graph'

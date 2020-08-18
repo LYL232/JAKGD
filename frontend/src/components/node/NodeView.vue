@@ -278,7 +278,7 @@ export default {
         return
       }
       this.buttonLoading = true
-      this.axios.get('/api/node/' + this.node.id + '/neighborhood').then(response => {
+      this.axios.get('/api/node/' + this.node.id + '/neighborhood?limit=25').then(response => {
         this.buttonLoading = false
         let nodes = response.data.nodes, hasThisNode = false
         for (let node of nodes) {
@@ -294,11 +294,8 @@ export default {
         this.bus.$emit('addHomeCard', {
           cardType: 'graph',
           cardData: {
-            graph: {
-              nodes: response.data.nodes,
-              relationships: response.data.relationships,
-
-            },
+            nodes: response.data.nodes,
+            relationships: response.data.relationships,
           },
           cardTitle: this.util.getNodeTitle(this.node) + '的邻域',
         })
