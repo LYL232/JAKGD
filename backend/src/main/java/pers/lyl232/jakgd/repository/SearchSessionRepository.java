@@ -30,7 +30,8 @@ public class SearchSessionRepository extends BaseSessionRepository {
         if (idList.size() < 1) {
             return new LinkedList<>();
         }
-        String query = "match (n) where id(n) in $idList return id(n) as id, " +
+        String query = "match (n) where id(n) in $idList " +
+                "and not '__internal' in labels(n) return id(n) as id, " +
                 "labels(n) as labels, properties(n) as properties";
         return getResultNodeData(session.query(query,
                 Collections.singletonMap("idList", idList)));
@@ -50,14 +51,14 @@ public class SearchSessionRepository extends BaseSessionRepository {
         if (queryProperties.size() < 1) {
             return new LinkedList<>();
         }
-        StringBuilder query = new StringBuilder("match (n) where ");
+        StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
         List<String> propertiesMatchCode = new LinkedList<>();
         for (String property : queryProperties) {
             propertiesMatchCode.add(String.format("n.%s =~ '.*%s.*'", property,
                     key));
         }
-        query.append(String.join(" or ", propertiesMatchCode));
-        query.append(" with distinct n " +
+        query.append(String.join(" or ", propertiesMatchCode))
+                .append(") with distinct n " +
                 "return id(n) as id, labels(n) as labels, " +
                 "properties(n) as properties limit $limit");
         logger.info("query in searchInNodeProperties: " + query.toString());
@@ -78,13 +79,13 @@ public class SearchSessionRepository extends BaseSessionRepository {
         if (labels.size() < 1) {
             return new LinkedList<>();
         }
-        StringBuilder query = new StringBuilder("match (n) where ");
+        StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
         List<String> labelMatchedCode = new LinkedList<>();
         for (String label : labels) {
             labelMatchedCode.add(String.format("n:%s", label));
         }
         query.append(String.join(" or ", labelMatchedCode))
-                .append(" with distinct n " +
+                .append(") with distinct n " +
                         "return id(n) as id, labels(n) as labels, properties(n) as properties " +
                         "limit ")
                 .append(limit);
