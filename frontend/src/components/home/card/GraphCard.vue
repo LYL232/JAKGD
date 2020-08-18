@@ -67,7 +67,7 @@ export default {
     },
     minCollision: {
       type: Number,
-      default: 60,
+      default: 120,
     },
     // highlight: [
     //   {

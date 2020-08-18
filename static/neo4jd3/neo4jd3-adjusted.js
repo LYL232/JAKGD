@@ -289,6 +289,7 @@
               style('fill', 'block').
               attr('dx', 30).
               attr('dy', -15).
+              style("font-size", "15px").
               text(function(d) {
                 return d.properties['名字']
               })
