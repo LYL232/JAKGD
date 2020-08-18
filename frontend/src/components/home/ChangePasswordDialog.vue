@@ -25,8 +25,8 @@ export default {
       loading: false,
       form: {
         password: '',
-        repeat: ''
-      }
+        repeat: '',
+      },
     }
   },
   methods: {
@@ -35,16 +35,20 @@ export default {
     },
     clickConfirm() {
       if (this.form.password !== this.form.repeat) {
-        this.$message('新密码和重复密码不匹配')
+        this.$notify.info({
+          title: '输入错误',
+          message: '新密码和重复密码不匹配',
+        })
         return
       }
       this.loading = true
       this.axios.post('/api/user/password', {
-        password: this.form.password.trim()
+        password: this.form.password.trim(),
       }).then(() => {
-        this.$message({
+        this.$notify({
+          title: '成功',
           message: '修改成功',
-          type: 'success'
+          type: 'success',
         })
         this.visible = false
         this.loading = false
@@ -56,24 +60,26 @@ export default {
         }).then((response) => {
           this.bus.$emit('authorizationChange', {
             username: this.globalData.username,
-            authorization: response.headers['authorization']
+            authorization: response.headers['authorization'],
           })
         }).catch((err) => {
           this.loading = false
-          this.$message.error('重新认证失败')
+          this.$notify.error({
+            title: '请求错误',
+            message: '重新认证失败',
+          })
           this.bus.$emit('authorizationChange', {
             username: null,
-            authorization: null
+            authorization: null,
           })
           console.log(err.response)
         })
       }).catch((err) => {
-        this.$message.error('修改失败')
+        this.util.errorHint(err, '修改失败')
         this.loading = false
-        console.log(err.response)
       })
     },
-  }
+  },
 }
 </script>
 

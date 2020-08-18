@@ -109,6 +109,8 @@ Vue.use(ElementUI)
 Vue.use(hl)
 Vue.use(VueAxios, axios)
 
+util.$notify = Vue.prototype.$notify
+
 // noinspection JSUnusedGlobalSymbols
 new Vue({
   render: h => h(App),

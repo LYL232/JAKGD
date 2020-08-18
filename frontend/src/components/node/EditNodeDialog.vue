@@ -85,7 +85,10 @@ export default {
       if (inputValue) {
         inputValue = inputValue.trim()
         if (!(/^[a-zA-Z_\u4E00-\u9FA5]([A-Za-z\u4E00-\u9FA50-9]){1,20}$/.exec(inputValue))) {
-          this.$message.warning('非法的标签: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20')
+          this.$notify.info({
+            title: '输入错误',
+            message: '非法的标签格式: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20',
+          })
           return
         }
         let unique = true
@@ -229,7 +232,10 @@ export default {
       let res = {}, propertyEditor = this.$refs.propertyEditor
       for (let property of propertyEditor.getFormProperties()) {
         if (!property.value || (property.value = property.value.trim()) === '') {
-          this.$message('属性值不能为空: ' + property.name)
+          this.$notify.info({
+            title: '输入错误',
+            message: '属性值不能为空: ' + property.name,
+          })
           return null
         }
         res[property.name] = property.value
@@ -257,9 +263,10 @@ export default {
     },
 
     requestSuccess() {
-      this.$message({
-        message: '操作完成',
+      this.$notify({
+        title: '成功',
         type: 'success',
+        message: '操作完成',
       })
       this.visible = false
       this.loading = false
@@ -270,11 +277,7 @@ export default {
     },
 
     requestFailed(err) {
-      if (err.errorMsg) {
-        this.$message.error('操作失败: ' + err.errorMsg)
-      } else {
-        this.$message.error('操作失败: 未知错误')
-      }
+      this.util.errorHint(err, '操作失败')
       this.loading = false
       this.show()
     },

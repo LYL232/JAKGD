@@ -102,9 +102,10 @@ export default {
         this.loading = true
         this.show = true
         this.axios.delete('/api/relationship/' + this.relationship.id).then(() => {
-          this.$message({
+          this.$notify({
+            title: '成功',
             type: 'success',
-            message: '删除成功!',
+            message: '删除成功',
           })
           this.loading = false
           this.$emit('relationship-deleted')

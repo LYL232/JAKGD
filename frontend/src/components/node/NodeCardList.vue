@@ -97,9 +97,16 @@ export default {
         this.loading = false
       }).catch(err => {
         if (err.errorMsg) {
-          this.$message.error('获取卡片数据失败: ' + err.errorMsg)
+          this.$notify.error({
+            title: '数据获取错误',
+            message: '获取卡片数据失败: + err.errorMsg',
+          })
+
         } else {
-          this.$message.error('获取卡片数据失败: 未知错误')
+          this.$notify.error({
+            title: '数据获取错误',
+            message: '获取卡片数据失败: 未知错误',
+          })
         }
         this.loading = false
       })
@@ -125,7 +132,8 @@ export default {
       }).then(() => {
         this.docButtonLoading = true
         this.axios.delete('/api/document/' + id).then(() => {
-          this.$message({
+          this.$notify({
+            title: '成功',
             message: '删除成功',
             type: 'success',
           })

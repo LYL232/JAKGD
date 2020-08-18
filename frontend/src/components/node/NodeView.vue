@@ -232,13 +232,8 @@ export default {
             asEndNode: value.asEndNode,
           })
         })
-
       }).catch(err => {
-        if (err.errorMsg) {
-          this.$message.error('获取关系数据错误' + err.errorMsg)
-        } else {
-          this.$message.error('获取关系数据错误')
-        }
+        this.util.errorHint(err, '获取关系数据错误')
       })
     },
     updateCards() {
@@ -247,7 +242,10 @@ export default {
 
     clickDeleteButton() {
       if (!this.$refs.nodeCardList.noCards()) {
-        this.$message.info('要删除此节点, 需要先删除其所有的卡片')
+        this.$notify.info({
+          title: '操作错误',
+          message: '要删除此节点, 需要先删除其所有的卡片',
+        })
         return
       }
       this.$confirm('永久删除该节点?', '确认删除', {
@@ -256,21 +254,27 @@ export default {
         type: 'warning',
       }).then(() => {
         this.axios.delete('/api/node/' + this.node.id).then(() => {
-          this.$message({
+          this.$notify({
+            title: '成功',
             type: 'success',
-            message: '删除成功!',
+            message: '删除成功',
           })
           this.bus.$emit('removeTab', {
             type: 'node-view',
             node: {id: this.nodeId},
           })
-        }).catch(this.util.simpleErrorHandler('删除错误'))
+        }).catch(err => {
+          this.util.errorHint(err, '删除错误')
+        })
       }).catch(() => {
       })
     },
     clickExpandButton() {
       if (!this.node) {
-        this.$message('无有效数据')
+        this.$notify.error({
+          title: '未知错误',
+          message: '无有效数据',
+        })
         return
       }
       this.buttonLoading = true
@@ -300,11 +304,7 @@ export default {
         })
       }).catch(err => {
         this.buttonLoading = false
-        if (err.errorMsg) {
-          this.$message.error('获取领域数据失败: ' + err.errorMsg)
-        } else {
-          this.$message.error('获取领域数据失败: 未知错误')
-        }
+        this.util.errorHint(err, '获取领域数据失败')
       })
     },
     /**

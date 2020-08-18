@@ -46,13 +46,19 @@ export default {
       this.value = this.value.trim()
 
       if (!this.value || this.value === '') {
-        this.$message.warning('请选择卡片类型')
+        this.$notify.info({
+          title: '输入错误',
+          message: '请选择卡片类型',
+        })
         return
       }
 
       this.cardName = this.cardName.trim()
       if (!this.cardName || this.cardName === '') {
-        this.$message.warning('卡片名称不能为空')
+        this.$notify.info({
+          title: '输入错误',
+          message: '卡片名称不能为空',
+        })
         return
       }
 
@@ -61,7 +67,10 @@ export default {
         let docName = this.cardName
 
         if (!(/^[a-zA-Z_\u4E00-\u9FA5]([A-Za-z\u4E00-\u9FA50-9]){1,20}$/.exec(docName))) {
-          this.$message.warning('非法的文档名: 请输入中英文字母, 数字组合的名字, 长度大于等于2小于等于20')
+          this.$notify.info({
+            title: '输入错误',
+            message: '非法的文档名: 请输入中英文字母, 数字组合的名字, 长度大于等于2小于等于20',
+          })
           return
         }
         this.visible = false
@@ -77,7 +86,10 @@ export default {
           type: 'md-editor',
         })
       } else {
-        this.$message.warning('不支持卡片类型:' + this.value)
+        this.$notify.info({
+          title: '请求错误',
+          message: '不支持卡片类型:' + this.value,
+        })
       }
     },
   },

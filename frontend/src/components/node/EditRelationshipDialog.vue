@@ -50,7 +50,10 @@ export default {
           }
         })
       } else {
-        this.$message.error('无法获取编辑的关系信息')
+        this.$notify.error({
+          title: '错误',
+          message: '无法获取编辑的关系信息',
+        })
       }
     },
 
@@ -88,7 +91,10 @@ export default {
       let res = {}, propertyEditor = this.$refs.propertyEditor
       for (let property of propertyEditor.getFormProperties()) {
         if (!property.value || (property.value = property.value.trim()) === '') {
-          this.$message('属性值不能为空: ' + property.name)
+          this.$notify.info({
+            title: '输入错误',
+            message: '属性值不能为空: ' + property.name,
+          })
           return null
         }
         res[property.name] = property.value
@@ -103,7 +109,8 @@ export default {
     updateDefaultRelationship(requestData) {
       this.loading = true
       this.axios.put('/api/relationship/' + this.relationship.id, requestData).then(() => {
-        this.$message({
+        this.$notify({
+          title: '成功',
           type: 'success',
           message: '修改关系成功',
         })

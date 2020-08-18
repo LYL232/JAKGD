@@ -18,23 +18,15 @@ export default {
    */
   errorHint(err, hint) {
     if (err.errorMsg) {
-      this.$message.error(hint + ': ' + err.errorMsg)
+      this.$notify.error({
+        title: '请求错误',
+        message: hint + ': ' + err.errorMsg,
+      })
     } else {
-      this.$message.error(hint + ': 未知错误')
-    }
-  },
-  /**
-   * 默认简单的错误handler
-   * @param hint 出错场景提示
-   * @returns {function(...[*]=)} handler
-   */
-  simpleErrorHandler(hint) {
-    return err => {
-      if (err.errorMsg) {
-        this.$message.error(hint + ': ' + err.errorMsg)
-      } else {
-        this.$message.error(hint + ': 未知错误')
-      }
+      this.$notify.error({
+        title: '请求错误',
+        message: hint + ': 未知错误',
+      })
     }
   },
 }

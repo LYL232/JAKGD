@@ -34,7 +34,10 @@ export default {
     },
     clickConfirm() {
       if (this.form.username === '' || this.form.password === '') {
-        this.$message('用户名或密码不能为空')
+        this.$notify.info({
+          title: '输入错误',
+          message: '用户名或密码不能为空',
+        })
         return
       }
       this.loading = true
@@ -46,16 +49,16 @@ export default {
         this.visible = false
         this.bus.$emit('authorizationChange', {
           username: this.form.username,
-          authorization: response.headers['authorization']
+          authorization: response.headers['authorization'],
         })
-        this.$message({
+        this.$notify({
+          title: '成功',
+          type: 'success',
           message: '登录成功',
-          type: 'success'
         })
       }).catch((err) => {
         this.loading = false
-        this.$message.error('登录失败: 用户名密码不匹配')
-        console.log(err.response)
+        this.util.errorHint(err, '登录失败')
       })
     },
   },

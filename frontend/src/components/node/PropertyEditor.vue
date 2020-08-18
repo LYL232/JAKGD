@@ -81,7 +81,10 @@ export default {
     clickNewPropertyNameButton() {
       if (!this.newPropertyName
         || (this.newPropertyName = this.newPropertyName.trim()) === '') {
-        this.$message('请输入新的属性名')
+        this.$notify.info({
+          title: '输入错误',
+          message: '请输入新的属性名',
+        })
         return
       }
       this.addNewPropertyInput(this.newPropertyName, '', true, true)
@@ -98,7 +101,10 @@ export default {
     addNewPropertyInput(name, value = '', deletable = true, info = false) {
       if (!(/^[a-zA-Z_\u4E00-\u9FA5]([A-Za-z\u4E00-\u9FA50-9]){1,20}$/.exec(name))) {
         if (info) {
-          this.$message.warning('非法的属性名: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20')
+          this.$notify.info({
+            title: '输入错误',
+            message: '非法的属性名: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20',
+          })
         }
         return
       }
@@ -109,7 +115,10 @@ export default {
           property.deletable = deletable
           property.value = value
           if (info) {
-            this.$message('属性已经存在: ' + name)
+            this.$notify.info({
+              title: '输入错误',
+              message: '属性已经存在: ' + name,
+            })
           }
           return
         }
@@ -117,7 +126,10 @@ export default {
 
       if (this.globalData.internalProperties.has(name)) {
         if (info) {
-          this.$message.warning('不允许设置' + name + '属性')
+          this.$notify.info({
+            title: '输入错误',
+            message: '不允许设置' + name + '属性',
+          })
         }
         return
       }

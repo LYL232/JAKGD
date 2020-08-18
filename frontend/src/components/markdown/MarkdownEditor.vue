@@ -77,12 +77,18 @@ export default {
     save(value) {
       let doc = this.doc
       if (!doc.name || doc.name === '') {
-        this.$message('文档名不能为空')
+        this.$notify.info({
+          title: '输入错误',
+          message: '文档名不能为空',
+        })
         return
       }
 
       if (!this.node) {
-        this.$message.warning('文档所属节点未知, 请关闭当前页面')
+        this.$notify.error({
+          title: '未知错误',
+          message: '文档所属节点未知, 请关闭当前页面',
+        })
         return
       }
 
@@ -90,31 +96,25 @@ export default {
 
       if (this.docId) {
         this.axios.put('/api/document/' + this.docId, {content: value}).then(() => {
-          this.$message({
+          this.$notify({
+            title: '成功',
             type: 'success',
             message: '保存成功',
           })
         }).catch(err => {
-          if (err.errorMsg) {
-            this.$message.error('保存失败: ' + err.errorMsg)
-          } else {
-            this.$message.error('保存失败: 未知原因')
-          }
+          this.util.errorHint(err, '保存失败')
         })
       } else {
         this.axios.post('/api/document/markdown/' + doc.name +
           '/partOf/' + this.node.id, {content: value}).then(response => {
           this.docId = response.data
-          this.$message({
+          this.$notify({
+            title: '成功',
             type: 'success',
             message: '创建文档成功',
           })
         }).catch(err => {
-          if (err.errorMsg) {
-            this.$message.error('创建文档失败: ' + err.errorMsg)
-          } else {
-            this.$message.error('创建文档失败: 未知原因')
-          }
+          this.util.errorHint(err, '创建文档失败')
         })
       }
     },

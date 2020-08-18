@@ -204,23 +204,14 @@ export default {
         this.bus.$emit('addHomeCard', newHomeCard)
       }).catch(err => {
         this.searchButtonLoading = false
-        if (err.errorMsg) {
-          this.$message.error('获取搜索信息失败: ' + err.errorMsg)
-        } else {
-          this.$message.error('获取搜索信息失败: 未知错误')
-        }
+        this.util.errorHint(err, '获取搜索信息失败')
       })
     },
     nodeCreated(nodeId) {
       this.axios.get('/api/node/' + nodeId).then(response => {
         this.addTab({type: 'node-view', node: response.data})
       }).catch(err => {
-        if (err.errorMsg) {
-          this.$message.error('获取节点数据失败: ' + err.errorMsg)
-        } else {
-          console.log(err)
-          this.$message.error('获取节点数据失败: 未知错误')
-        }
+        this.util.errorHint(err, '获取节点数据失败')
       })
     },
     clickCreateNodeButton() {

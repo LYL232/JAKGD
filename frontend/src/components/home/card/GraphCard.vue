@@ -239,12 +239,7 @@ export default {
           this.expandButtonLoading = false
           this.appendGraph(data, this.nodeSelected)
         }).catch(err => {
-        if (err.errorMsg) {
-          this.$message.error('获取节点领域错误: ' + err.errorMsg)
-        } else {
-          this.$message.error('获取节点领域错误: 未知错误')
-          console.log(err)
-        }
+        this.util.errorHint(err, '获取节点领域错误')
         this.expandButtonLoading = false
       })
     },
@@ -297,17 +292,14 @@ export default {
         // this.deleteNode(this.nodeSelected.id)
         this.deleteButtonLoading = true
         this.axios.delete('/api/node/' + this.nodeSelected.id).then(() => {
-          this.$message({
+          this.$notify({
+            title: '成功',
             type: 'success',
-            message: '删除成功!',
+            message: '删除成功',
           })
           this.deleteButtonLoading = false
         }).catch(err => {
-          if (err.errorMsg) {
-            this.$message.error('删除失败: ' + err.errorMsg)
-          } else {
-            this.$message.error('删除失败: 未知错误')
-          }
+          this.util.errorHint(err, '删除失败')
           this.deleteButtonLoading = false
         })
       }).catch(() => {

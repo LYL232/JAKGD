@@ -70,7 +70,10 @@ export default {
       let res = {}
       for (let property of this.$refs.propertyEditor.getFormProperties()) {
         if (!property.value || (property.value = property.value.trim()) === '') {
-          this.$message('属性值不能为空: ' + property.name)
+          this.$notify.info({
+            title: '输入错误',
+            message: '属性值不能为空: ' + property.name,
+          })
           return null
         }
         res[property.name] = property.value
@@ -80,12 +83,18 @@ export default {
 
     clickConfirm() {
       if (!this.node) {
-        this.$message.error('节点信息缺失')
+        this.$notify.error({
+          title: '未知错误',
+          message: '节点信息缺失',
+        })
         return
       }
 
       if (!this.globalData.username || this.globalData.username === '') {
-        this.$message.warning('请登录')
+        this.$notify.info({
+          title: '未认证',
+          message: '请登录',
+        })
         return
       }
 
@@ -96,23 +105,35 @@ export default {
 
       let targetId = parseInt(this.form.targetId)
       if (isNaN(targetId)) {
-        this.$message('id必须为整数')
+        this.$notify.info({
+          title: '输入错误',
+          message: 'id必须为整数',
+        })
         return
       }
 
       if (targetId === this.node.id) {
-        this.$message('不允许自关联')
+        this.$notify.info({
+          title: '输入错误',
+          message: '不允许自关联',
+        })
         return
       }
 
       this.form.relType = this.form.relType.trim()
       if (this.form.relType === '') {
-        this.$message('关系类型不能为空')
+        this.$notify.info({
+          title: '输入错误',
+          message: '关系类型不能为空',
+        })
         return
       }
 
       if (!(/^[a-zA-Z_\u4E00-\u9FA5]([A-Za-z\u4E00-\u9FA50-9]){1,20}$/.exec(this.form.relType))) {
-        this.$message.warning('非法的关系名: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20')
+        this.$notify.info({
+          title: '输入错误',
+          message: '非法的关系名: 请输入中英文字母, 数字组合的属性名, 长度大于等于2小于等于20',
+        })
         return
       }
 
@@ -158,7 +179,8 @@ export default {
     },
 
     createSuccess() {
-      this.$message({
+      this.$notify({
+        title: '成功',
         message: '关联成功',
         type: 'success',
       })
@@ -174,11 +196,7 @@ export default {
 
     createFailed(err) {
       this.loading = false
-      if (err.errorMsg) {
-        this.$message.error(err.errorMsg)
-      } else {
-        this.$message.error('未知服务器错误')
-      }
+      this.util.errorHint(err, '创建关系错误')
     },
 
     fetchSuggestions(queryString, cb) {

@@ -40,7 +40,8 @@ export default {
       this.loading = true
       this.axios.put('/api/document/' + this.documentId,
         {name: this.form.name}).then(() => {
-        this.$message({
+        this.$notify({
+          title: '成功',
           message: '修改成功',
           type: 'success',
         })
@@ -48,7 +49,7 @@ export default {
         this.loading = false
         this.$emit('updated', {
           name: this.form.name,
-          docId: this.documentId
+          docId: this.documentId,
         })
       }).catch(err => {
         this.util.errorHint(err, '修改卡片名字失败')
