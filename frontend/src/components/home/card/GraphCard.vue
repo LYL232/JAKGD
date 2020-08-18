@@ -168,6 +168,16 @@ export default {
       let nodes = data.nodes, relationships = data.relationships
       this.nodesMap = new Map()
       this.relationshipsMap = new Map()
+      this.transformNodes(nodes)
+      this.transformRelationships(relationships)
+      this.neo4jData = {results: [{data: [{graph: {nodes, relationships}}]}]}
+    },
+
+    /**
+     * 转化节点数据为易于展示的形式
+     * @param nodes 节点对象数组
+     */
+    transformNodes(nodes) {
       for (let i = 0; i < nodes.length; ++i) {
         let node = nodes[i]
         // 删除不必要属性 属性名映射
@@ -189,17 +199,39 @@ export default {
           node.labels[j] = this.globalData.nodeLabelNameMap(node.labels[j])
         }
         if (node.labels.length > 1) {
-          node.labels[0] = node.labels[node.labels.length - 1]
+          let pos = this.util.randomNumInRangeWithA(0, node.labels.length),
+            posLabel = node.labels[pos]
+          node.labels[pos] = node.labels[0]
+          node.labels[0] = posLabel
         }
-
       }
-      for (let i = 0; i < relationships.length; ++i) {
-        relationships[i].type = this.globalData.relationshipTypeNameMap(relationships[i].type)
-        this.relationshipsMap.set(relationships[i].id, relationships[i])
-      }
-
-      this.neo4jData = {results: [{data: [{graph: {nodes, relationships}}]}]}
     },
+
+    /**
+     * 转换关系对象为易于展示的形式
+     * @param relationships 关系对象数组
+     */
+    transformRelationships(relationships) {
+      for (let i = 0; i < relationships.length; ++i) {
+        let relationship = relationships[i]
+        for (let name in relationship.properties) {
+          if (Object.prototype.hasOwnProperty.call(relationship.properties, name)) {
+            if (this.globalData.internalProperties.has(name)) {
+              delete relationship.properties[name]
+            } else {
+              let mapName = this.globalData.propertyNameMap(name)
+              if (mapName !== name) {
+                relationship.properties[mapName] = relationship.properties[name]
+                delete relationship.properties[name]
+              }
+            }
+          }
+        }
+        relationships[i].type = this.globalData.relationshipTypeNameMap(relationship.type)
+        this.relationshipsMap.set(relationships.id, relationships)
+      }
+    },
+
     /**
      * 删除本地数据中的指定id的node和相关的关系并更新图
      * TODO: d3删除更新出问题
@@ -277,8 +309,9 @@ export default {
       if (nodes.length === 0 && relationships.length === 0) {
         return
       }
+      this.transformNodes(nodes)
+      this.transformRelationships(relationships)
       this.neo4jD3.updateWithD3Data({nodes, relationships})
-
     },
     addNodeViewTab(node) {
       this.bus.$emit('newTab', {type: 'node-view', node: node})
