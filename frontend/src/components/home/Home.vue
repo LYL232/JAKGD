@@ -185,17 +185,16 @@ export default {
       this.searchButtonLoading = true
       this.axios.post('/api/search', {
         key: this.searchString,
-        limit: 1000,
+        limit: (!this.searchString || this.searchString === '') ? 25 : 1000,
         queryProperties: JSON.stringify(['description', 'name', 'summary']),
       }).then(response => {
         this.searchButtonLoading = false
-        let data = response.data, totLength =
-          data.nodes.length + data.relationships.length,
+        let data = response.data, totLength = data.nodes.length,
           newHomeCard = {
             cardData: data,
             cardTitle: this.searchString !== '' ? '搜索结果: ' + this.searchString : '',
           }
-        if (totLength > 50) {
+        if (totLength > 35) {
           newHomeCard.cardType = 'graph-data-table'
         } else {
           newHomeCard.cardType = 'graph'
