@@ -1,5 +1,5 @@
 <template>
-  <div v-highlight v-html="htmlContent"></div>
+  <div class='content' v-highlight v-html='htmlContent'></div>
 </template>
 
 <script>
@@ -12,7 +12,25 @@ export default {
       htmlContent: marked(
         this.mdContent.replace('{{JAKGD_BACKEND_URL}}',
           this.globalData.backendUrl,
-        ), {sanitize: false}),
+        ), {
+          'baseUrl': null,
+          'breaks': false,
+          'gfm': true,
+          'headerIds': true,
+          'headerPrefix': '',
+          'highlight': null,
+          'langPrefix': 'language-',
+          'mangle': true,
+          'pedantic': false,
+          'sanitize': false,
+          'sanitizer': null,
+          'silent': false,
+          'smartLists': false,
+          'smartypants': false,
+          'tokenizer': null,
+          'walkTokens': null,
+          'xhtml': false
+        }),
     }
   },
   props: {
@@ -32,5 +50,8 @@ export default {
 </script>
 
 <style scoped>
-
+  .content {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
 </style>
