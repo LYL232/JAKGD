@@ -54,7 +54,7 @@ public class SearchSessionRepository extends BaseSessionRepository {
         StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
         List<String> propertiesMatchCode = new LinkedList<>();
         for (String property : queryProperties) {
-            propertiesMatchCode.add(String.format("n.%s =~ '.*%s.*'", property,
+            propertiesMatchCode.add(String.format("n.%s =~ '(?i).*%s.*'", property,
                     key));
         }
         query.append(String.join(" or ", propertiesMatchCode))
@@ -105,7 +105,7 @@ public class SearchSessionRepository extends BaseSessionRepository {
     public List<RelationshipData> searchInRelationshipType(
             Session session, String key, int limit) {
         String query = String.format("match ()-[r]->() where not type(r) contains '__' " +
-                "and type(r) =~ '.*%s.*' with distinct r return id(r) as id, " +
+                "and type(r) =~ '(?i).*%s.*' with distinct r return id(r) as id, " +
                 "id(startNode(r)) as startNode, id(endNode(r)) as endNode, " +
                 "type(r) as type, properties(r) as properties limit %d", key, limit);
         logger.info("query in searchInRelationshipType: " + query);
@@ -124,12 +124,12 @@ public class SearchSessionRepository extends BaseSessionRepository {
         // 如果搜索关键字是某个可以展示的内部标签的前端名称, 则去搜索这个label的节点
         if (nameToInternalLabel.containsKey(key)) {
             query = String.format("match (n) unwind labels(n) as label with " +
-                    "distinct label where (not label contains '__' and label =~'.*%s.*') " +
+                    "distinct label where (not label contains '__' and label =~'(?i).*%s.*') " +
                     "or label = '%s' " +
                     "return label", key, nameToInternalLabel.get(key));
         } else {
             query = String.format("match (n) unwind labels(n) as label with " +
-                    "distinct label where not label contains '__' and label =~'.*%s.*' " +
+                    "distinct label where not label contains '__' and label =~'(?i).*%s.*' " +
                     "return label", key);
         }
         logger.info("query in searchAllMatchedLabels: " + query);
@@ -158,7 +158,7 @@ public class SearchSessionRepository extends BaseSessionRepository {
         StringBuilder query = new StringBuilder("match ()-[r]->() where ");
         List<String> propertiesMatchCode = new LinkedList<>();
         for (String property : queryProperties) {
-            propertiesMatchCode.add(String.format("r.%s =~ '.*%s.*'", property,
+            propertiesMatchCode.add(String.format("r.%s =~ '(?i).*%s.*'", property,
                     key));
         }
         query.append(String.join(" or ", propertiesMatchCode))
