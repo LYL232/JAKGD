@@ -1,6 +1,6 @@
 <template>
   <mavon-editor
-          :value="mdContent"
+          :value="content"
           :subfield="false"
           :defaultOpen="'preview'"
           :toolbarsFlag="false"
@@ -14,6 +14,11 @@
 
 export default {
   name: 'MarkdownBlock',
+  computed: {
+    content() {
+      return this.mdContent.replace('{{JAKGD_BACKEND_URL}}', window.location.origin)
+    }
+  },
   props: {
     mdContent: String,
   },

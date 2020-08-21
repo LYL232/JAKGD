@@ -3,8 +3,7 @@
     <h1 v-if="header">{{header + (docId ? '(' + docId + ')' : '')}}</h1>
     <el-divider></el-divider>
     <mavon-editor style="min-height: 600px" v-model="content" ref="editor" @save="save" :ishljs="true"
-                  :toolbars="toolbars"/>
-    <!--                  @imgAdd="imgAdd" @imgDel="imgDel"/>-->
+                  :toolbars="toolbars" @imgAdd="imgAdd" @imgDel="imgDel"/>
   </div>
 </template>
 
@@ -26,7 +25,7 @@ export default {
   data() {
     return {
       docId: null,
-      content: this.doc.content,
+      content: this.doc.content.replace('{{JAKGD_BACKEND_URL}}', window.location.origin),
       toolbars: {
         // TODO: 上传图片
         bold: true, // 粗体
@@ -41,7 +40,7 @@ export default {
         ol: true, // 有序列表
         ul: true, // 无序列表
         link: true, // 链接
-        imagelink: false, // 图片链接
+        imagelink: true, // 图片链接
         code: true, // code
         table: true, // 表格
         fullscreen: true, // 全屏编辑
@@ -92,7 +91,7 @@ export default {
         return
       }
 
-      value = value.replace(this.globalData.backendUrl, '{{JAKGD_BACKEND_URL}}')
+      value = value.replace(window.location.origin, '{{JAKGD_BACKEND_URL}}')
 
       if (this.docId) {
         this.axios.put('/api/document/' + this.docId, {content: value}).then(() => {
@@ -118,23 +117,31 @@ export default {
         })
       }
     },
-    // imgAdd(pos, file) {
-    //   pos
-    //   file
-    //   // 第一步.将图片上传到服务器.
-    //   //   const res: ApiResponse<
-    //   //     FileInfo
-    //   //     > = await HttpRequest.UploaderModule.handleFileUploader({
-    //   //     file
-    //   //   });
-    //   //   if (res && res.data) {
-    //   //     // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
-    //   //     this.$refs.editor.$img2Url(pos, res.data.url);
-    //   //   }
-    // },
-    // imgDel(pos) {
-    //   delete this.img_file[pos]
-    // },
+    imgAdd(pos, file) {
+      let param = new FormData()
+      param.append('file', file)
+      this.axios.post('/api/file', param, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      }).then(res => {
+        this.$refs.editor.$img2Url(pos, window.location.origin + '/media' + res.data)
+      }).catch(err => {
+        delete this.$refs.editor.$refs.toolbar_left.$imgDelByFilename(file.name)
+        this.util.errorHint(err, '图片上传失败')
+      })
+    },
+    imgDel(pos) {
+      pos[0] = pos[0].toString()
+      if (pos[0].startsWith(window.location.origin + '/media')) {
+        let path = pos[0].replace(window.location.origin + '/media', '')
+        this.axios.delete('/api/file', {
+          params: {path},
+        }).then(() => {
+          this.$refs.editor.$refs.toolbar_left.$imgDelByFilename(pos[0])
+        }).catch(err => {
+          this.util.errorHint(err, '图片删除失败')
+        })
+      }
+    },
   },
 }
 </script>

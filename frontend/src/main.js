@@ -45,7 +45,7 @@ Vue.prototype.globalData = globalData
 // 全局实用函数
 Vue.prototype.util = util
 
-axios.defaults.baseURL = globalData.backendUrl = window.location.origin
+axios.defaults.baseURL = window.location.origin
 // 请求拦截器
 axios.interceptors.request.use(
   config => {

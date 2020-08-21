@@ -79,8 +79,6 @@ export default {
     '错误的请求文件类型',
     '不允许多重同类型关系',
   ],
-  // 后端url
-  // backendUrl: 'http://backend:8080',
   // 不能被用户操作的属性
   internalProperties: new Set(['created', 'updated', 'author', 'labels']),
   // 基础类型节点所需必要属性
