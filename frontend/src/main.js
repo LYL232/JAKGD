@@ -9,18 +9,16 @@ import MavonEditor from 'mavon-editor'
 // import 'default-passive-events'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'mavon-editor/dist/css/index.css'
-import hl from './highlight'
 import globalData from './global-data'
 import util from './util'
 
 // 识别latex语法的MathJax的配置
+// noinspection JSUnusedGlobalSymbols
 window.MathJax.config = {
   startup: {
     ready: () => {
       window.MathJax.startup.defaultReady()
-      window.MathJax.startup.promise.then(() => {
-        console.log('MathJax initial typesetting complete')
-      })
+      window.MathJax.startup.promise.then(() => {})
     },
   },
   tags: 'all', // 为方程式编号
@@ -106,7 +104,7 @@ axios.interceptors.response.use(
 Vue.config.productionTip = false
 Vue.use(MavonEditor)
 Vue.use(ElementUI)
-Vue.use(hl)
+// Vue.use(hl)
 Vue.use(VueAxios, axios)
 
 util.$notify = Vue.prototype.$notify

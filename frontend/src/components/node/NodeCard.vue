@@ -10,7 +10,7 @@
         <el-button type="danger" icon="el-icon-delete" circle></el-button>
       </el-button-group>
     </div>
-    <div v-highlight v-html="htmlContent"></div>
+    <div v-html="htmlContent"></div>
   </el-card>
 </template>
 
