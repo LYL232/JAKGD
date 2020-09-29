@@ -40,3 +40,6 @@ web
 - docker-compose up --build
 - 启动: docker-compose up
 
+- https部署
+  - 将证书文件分别重命名为'server.crt'和'server.key'放入./nginx/ssl文件夹下
+  - 修改./nginx/default.conf中的server_name为ssl证书对应的域名
