@@ -283,8 +283,6 @@ class GraphWindow {
     this._relationshipText = null
     // 记录着运行时所有relationship overlay的dom对象, class == relationship & overlay
     this._relationshipOverlay = null
-    // 记录着运行时所有relationship Outline的dom对象, class == relationship & outline
-    this._relationshipOutline = null
     // 高亮节点的id集合
     this._highlightNodeIdSet = new Set()
     // node id => node对象的映射
@@ -427,7 +425,7 @@ class GraphWindow {
    * @param relationships {[{id, type, startNode, endNode, properties}]} 关系结构体数组
    * @param nodePoints {Map} 指定某些节点的初始位置 id => {x, y}
    */
-  appendGraph({nodes, relationships}, nodePoints= null) {
+  appendGraph({nodes, relationships}, nodePoints = null) {
     if (nodes && nodes.length > 0) {
       this._appendNodes(nodes, nodePoints)
     }
@@ -590,20 +588,18 @@ class GraphWindow {
         text(function(relationship) {
           return relationship.type
         }),
-      // 表示关系的直线
-      outline = relationshipEnter.append('path').
-        attr('class', 'outline').
-        attr('fill', '#a5abb6').
-        attr('stroke', 'none'),
       // 鼠标移动到边上后出现的蓝边, 增大关系被选中的范围
       overlay = relationshipEnter.append('path').attr('class', 'overlay')
+
+    // 表示关系的直线
+    relationshipEnter.append('path').
+      attr('class', 'outline').
+      attr('fill', '#a5abb6').
+      attr('stroke', 'none')
 
     svgRelationships.exit().remove()
 
     this._relationship = relationshipEnter.merge(svgRelationships)
-    this._relationshipOutline = outline.merge(
-      this._svg.selectAll('.relationship .outline'),
-    )
     this._relationshipOverlay = overlay.merge(
       this._svg.selectAll('.relationship .overlay'),
     )
