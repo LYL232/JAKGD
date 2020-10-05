@@ -202,6 +202,7 @@ export default {
           this.nodeSelected.id,
         ),
       })
+      this.nodeSelected = null
     },
   },
 }
