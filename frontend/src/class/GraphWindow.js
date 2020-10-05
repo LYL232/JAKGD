@@ -126,9 +126,9 @@ class GraphNode {
     this.id = node.id
     this.labels = []
     // 节点作为关系的源点的id的集合
-    this.asRelSource = []
+    this.asRelSource = new Set()
     // 节点作为关系的终点的id的集合
-    this.asRelTarget = []
+    this.asRelTarget = new Set()
 
     let that = this
     // 删除不必要属性 属性名映射
@@ -177,8 +177,8 @@ class GraphRelationship {
     // 维护关系端点到其涉及到的关系的集合
     // 维护id集合, 因为直接push(this)的话this对应的关系对象在relationshipMap中被
     // 替换, asRelSource和asRelTarget里的对象将失效
-    source.asRelSource.push(this.id)
-    target.asRelTarget.push(this.id)
+    source.asRelSource.add(this.id)
+    target.asRelTarget.add(this.id)
     this.properties = {}
 
     // 删除不必要属性 属性名映射
@@ -426,11 +426,29 @@ class GraphWindow {
    * @param nodePoints {Map} 指定某些节点的初始位置 id => {x, y}
    */
   appendGraph({nodes, relationships}, nodePoints = null) {
-    if (nodes && nodes.length > 0) {
-      this._appendNodes(nodes, nodePoints)
-    }
-    if (relationships && relationships.length > 0) {
-      this._appendRelationships(relationships)
+    this._appendLogicalGraph({nodes, relationships, nodePoints})
+    this._displayGraph()
+  }
+
+  /**
+   * 删除图数据
+   * @param nodeIdSet: {Set} 需要删除的id集合
+   * @param relationshipIdSet: {Set} 需要删除的关系id集合
+   */
+  removeGraph({nodeIdSet, relationshipIdSet}) {
+    this._removeLogicalGraph({nodeIdSet, relationshipIdSet})
+    this._displayGraph()
+  }
+
+  /**
+   * 固定节点的位置
+   * @param id {number} 节点id
+   */
+  stickNode(id) {
+    let node = this._nodeMap.get(id)
+    if (node) {
+      node.fx = node.x
+      node.fy = node.y
     }
   }
 
@@ -460,94 +478,129 @@ class GraphWindow {
   }
 
   /**
-   * 追加node, 如果有相同id, 则更新
-   * @param nodes {[{id, labels, properties}]} 节点结构体信息
-   * @param nodePoints {Map} 节点初始位置信息 id => {x, y}
+   * 追加逻辑层的图表示
+   * @param nodes {[{id, labels, properties}]} 节点结构体数组
+   * @param relationships {[{id, type, startNode, endNode, properties}]} 关系结构体数组
+   * @param nodePoints {Map} 指定某些节点的初始位置 id => {x, y}
+   * @private
    */
-  _appendNodes(nodes, nodePoints) {
-    this._registerNodes(nodes, nodePoints)
-    let graphNodes = []
+  _appendLogicalGraph({nodes, relationships, nodePoints}) {
+    if (nodes && nodes.length > 0) {
+      // 转换并注册节点到nodeMap中, 如果存在, 则覆盖
+      let nodeMap = this._nodeMap
+      nodes.forEach((node) => {
+        let x, y
+        if (nodePoints && nodePoints.has(node.id)) {
+          x = nodePoints.get(node.id).x
+          y = nodePoints.get(node.id).y
+        } else {
+          x = Math.random()
+          y = Math.random()
+        }
+        let oldNode = this._nodeMap.get(node.id),
+          newNode = new GraphNode(node, x, y)
+
+        if (oldNode) {
+          // 如果有旧节点的话, 要把旧节点的信息转移到新节点上, 并且将
+          // 旧节点相关的关系的端点设置为新的节点, dom的更新需要节点的引用, 旧节点引用
+          // 失效后会造成图数据没更新的bug
+          for (let relId of oldNode.asRelTarget) {
+            this._relationshipMap.get(relId).target = newNode
+          }
+          for (let relId of oldNode.asRelSource) {
+            this._relationshipMap.get(relId).source = newNode
+          }
+          newNode.x = oldNode.x
+          newNode.y = oldNode.y
+          newNode.fx = oldNode.fx
+          newNode.fy = oldNode.fy
+          newNode.asRelSource = oldNode.asRelSource
+          newNode.asRelTarget = oldNode.asRelTarget
+        }
+        nodeMap.set(node.id, newNode)
+      })
+    }
+    if (relationships && relationships.length > 0) {
+      // 转换并注册关系到relationshipMap中
+      relationships.forEach((relationship) => {
+        // 设置关系的起点和终点对象
+        let target = this._nodeMap.get(relationship.startNode),
+          source = this._nodeMap.get(relationship.endNode)
+        if (source && target) {
+          this._relationshipMap.set(relationship.id, relationship)
+        } else {
+          // 如果找不到指定的节点, 那么表明信息缺失
+          throw Error('can not find relationship node. relationship: ' +
+            JSON.stringify(relationship))
+        }
+        this._relationshipMap.set(relationship.id,
+          new GraphRelationship(relationship, source, target))
+      })
+    }
+  }
+
+  /**
+   * 删除逻辑层的图表示, 维护逻辑层图数据的一致性: 关系的两端节点数据在nodeMap中能找到
+   * @param nodeIdSet {Set} 需要删除的节点id集合
+   * @param relationshipIdSet {Set} 需要删除的关系id集合
+   * @private
+   */
+  _removeLogicalGraph({nodeIdSet, relationshipIdSet}) {
+    if (nodeIdSet) {
+      if (!relationshipIdSet) {
+        // 如果需要删除的关系id集合未定义, 则定义, 因为接下来的节点删除
+        relationshipIdSet = new Set()
+      }
+      for (let id of nodeIdSet) {
+        let node = this._nodeMap.get(id)
+        if (node) {
+          // 如果存在节点: 删除与节点相关的关系
+          for (let relId of node.asRelTarget) {
+            relationshipIdSet.add(relId)
+          }
+          for (let relId of node.asRelSource) {
+            relationshipIdSet.add(relId)
+          }
+        }
+        this._nodeMap.delete(id)
+      }
+    }
+    if (relationshipIdSet) {
+      for (let id of relationshipIdSet) {
+        let rel = this._relationshipMap.get(id)
+        if (rel) {
+          // 如果存在关系, 维护记录的信息的一致性
+          let source = this._nodeMap.get(rel.source.id),
+            target = this._nodeMap.get(rel.target.id)
+          if (source) {
+            // 如果仍存在图中, 维护作为关系的端点信息, 下同
+            source.asRelSource.delete(id)
+          }
+          if (target) {
+            target.asRelTarget.delete(id)
+          }
+        }
+        this._relationshipMap.delete(id)
+      }
+    }
+  }
+
+  /**
+   * 根据目前的逻辑层表示(nodeMap和relationshipMap)更新表示层的数据
+   * @private
+   */
+  _displayGraph() {
+    let graphNodes = [], graphRelationships = []
     for (let value of this._nodeMap.values()) {
       graphNodes.push(value)
     }
-    this._setNodeDoms(graphNodes)
-    this._simulation.nodes(graphNodes)
-  }
-
-  /**
-   * 追加relationship, 如果有相同id, 则更新
-   * @param relationships
-   */
-  _appendRelationships(relationships) {
-    this._registerRelationships(relationships)
-    let graphRelationships = []
     for (let value of this._relationshipMap.values()) {
       graphRelationships.push(value)
     }
+    this._setNodeDoms(graphNodes)
     this._setRelationshipDoms(graphRelationships)
+    this._simulation.nodes(graphNodes)
     this._simulation.force('link').links(graphRelationships)
-  }
-
-  /**
-   * 转换并注册节点到nodeMap中
-   * @param sourceNodes {[{id, labels, properties}]} 原始节点对象列表
-   * @param nodePoints {Map} 节点初始位置信息 id => {x, y}
-   * @private
-   */
-  _registerNodes(sourceNodes, nodePoints) {
-    let nodeMap = this._nodeMap
-    sourceNodes.forEach((node) => {
-      let x, y
-      if (nodePoints && nodePoints.has(node.id)) {
-        x = nodePoints.get(node.id).x
-        y = nodePoints.get(node.id).y
-      } else {
-        x = Math.random()
-        y = Math.random()
-      }
-      let oldNode = this._nodeMap.get(node.id),
-        newNode = new GraphNode(node, x, y)
-
-      if (oldNode) {
-        // 如果有旧节点的话, 要把旧节点的信息转移到新节点上, 并且将
-        // 旧节点相关的关系的端点设置为新的节点, dom的更新需要节点的引用, 旧节点引用
-        // 失效后会造成图数据没更新的bug
-        for (let relId of oldNode.asRelTarget) {
-          this._relationshipMap.get(relId).target = newNode
-        }
-        for (let relId of oldNode.asRelSource) {
-          this._relationshipMap.get(relId).source = newNode
-        }
-        newNode.x = oldNode.x
-        newNode.y = oldNode.y
-        newNode.asRelSource = oldNode.asRelSource
-        newNode.asRelTarget = oldNode.asRelTarget
-      }
-      nodeMap.set(node.id, newNode)
-    })
-  }
-
-  /**
-   * 转换并注册关系到relationshipMap中
-   * @param sourceRelationships {[{id, type, properties, startNode, endNode}]}
-   *  原始关系对象列表
-   * @private
-   */
-  _registerRelationships(sourceRelationships) {
-    sourceRelationships.forEach((relationship) => {
-      // 设置关系的起点和终点对象
-      let target = this._nodeMap.get(relationship.startNode),
-        source = this._nodeMap.get(relationship.endNode)
-      if (source && target) {
-        this._relationshipMap.set(relationship.id, relationship)
-      } else {
-        // 如果找不到指定的节点, 那么表明信息缺失
-        throw Error('can not find relationship node. relationship: ' +
-          JSON.stringify(relationship))
-      }
-      this._relationshipMap.set(relationship.id,
-        new GraphRelationship(relationship, source, target))
-    })
   }
 
   /**
@@ -590,7 +643,6 @@ class GraphWindow {
         }),
       // 鼠标移动到边上后出现的蓝边, 增大关系被选中的范围
       overlay = relationshipEnter.append('path').attr('class', 'overlay')
-
     // 表示关系的直线
     relationshipEnter.append('path').
       attr('class', 'outline').
@@ -598,7 +650,6 @@ class GraphWindow {
       attr('stroke', 'none')
 
     svgRelationships.exit().remove()
-
     this._relationship = relationshipEnter.merge(svgRelationships)
     this._relationshipOverlay = overlay.merge(
       this._svg.selectAll('.relationship .overlay'),
