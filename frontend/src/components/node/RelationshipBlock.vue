@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import PopoverNodeDirector from './PopoverNodeDirector'
+const PopoverNodeDirector = () => import('./PopoverNodeDirector')
 
 export default {
   name: 'RelationshipBlock',
@@ -48,8 +48,8 @@ export default {
      */
     editRelationship(relationship) {
       this.$emit('edit-relationship', relationship)
-    }
-  }
+    },
+  },
 }
 </script>
 

@@ -48,12 +48,14 @@
 </template>
 
 <script>
+// 首页优先加载图展示组件, 该组件在CardList中
 import CardList from './HomeCardList'
-import MarkdownEditor from '../markdown/MarkdownEditor'
-import NodeView from '../node/NodeView'
-import LoginDialog from './LoginDialog'
-import ChangePasswordDialog from './ChangePasswordDialog'
-import EditNodeDialog from '../node/EditNodeDialog'
+
+const MarkdownEditor = () => import( '../markdown/MarkdownEditor'),
+  NodeView = () => import('../node/NodeView'),
+  LoginDialog = () => import( './LoginDialog'),
+  ChangePasswordDialog = () => import( './ChangePasswordDialog'),
+  EditNodeDialog = () => import( '../node/EditNodeDialog')
 
 export default {
   name: 'Main',

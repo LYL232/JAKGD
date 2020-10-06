@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import PropertyEditor from './PropertyEditor'
+const PropertyEditor = () => import('./PropertyEditor')
 
 export default {
   name: 'EditRelationshipDialog',

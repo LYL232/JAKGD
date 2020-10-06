@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import PropertyEditor from './PropertyEditor'
+const PropertyEditor = () => import ('./PropertyEditor')
 
 export default {
   name: 'EditNodeDialog',
@@ -292,7 +292,7 @@ export default {
           }
         }
       } else {
-        this.tag = []
+        this.tags = []
         this.$refs.propertyEditor.getFormProperties().forEach(property => {
           property.deletable = true
         })

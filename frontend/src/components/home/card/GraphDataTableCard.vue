@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import PopoverNodeDirector from '../../node/PopoverNodeDirector'
-import PropertyPopoverButton from '../../node/PropertyPopoverButton'
+const PopoverNodeDirector = () => import('../../node/PopoverNodeDirector'),
+  PropertyPopoverButton = () => import('../../node/PropertyPopoverButton')
 
 export default {
   name: 'GraphDataTableCard',

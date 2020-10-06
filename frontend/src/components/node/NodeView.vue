@@ -84,14 +84,42 @@
 
 <script>
 import '../../../../static/mathjax/tex-chtml'
-import NodeCardList from './NodeCardList'
-import PopoverNodeDirector from './PopoverNodeDirector'
-import AddNodeCardDialog from './AddNodeCardDialog'
-import EditRelationshipDialog from './EditRelationshipDialog'
-import EditNodeDialog from './EditNodeDialog'
-import RelationshipBlock from './RelationshipBlock'
-import PropertiesBox from './PropertiesBox'
-import CreateRelationshipDialog from './CreateRelationshipDialog'
+
+const NodeCardList = () => import('./NodeCardList'),
+  PopoverNodeDirector = () => import('./PopoverNodeDirector'),
+  AddNodeCardDialog = () => import('./AddNodeCardDialog'),
+  EditRelationshipDialog = () => import('./EditRelationshipDialog'),
+  EditNodeDialog = () => import('./EditNodeDialog'),
+  RelationshipBlock = () => import('./RelationshipBlock'),
+  PropertiesBox = () => import('./PropertiesBox'),
+  CreateRelationshipDialog = () => import('./CreateRelationshipDialog')
+
+// 识别latex语法的MathJax的配置
+// noinspection JSUnusedGlobalSymbols
+window.MathJax.config = {
+  startup: {
+    ready: () => {
+      window.MathJax.startup.defaultReady()
+      window.MathJax.startup.promise.then(() => {
+      })
+    },
+  },
+  tags: 'all', // 为方程式编号
+  tagSide: 'left', // 方程式编号的位置
+  tex: {
+    processEscapes: true,
+    processEnvironments: true, // process \begin{xxx}...\end{xxx} outside math mode
+    processRefs: true, // process \ref{...} outside of math mode
+    inlineMath: [
+      ['$', '$'],
+      ['\\(', '\\)'],
+    ],
+    displayMath: [ // start/end delimiter pairs for display math
+      ['$$', '$$'],
+      ['\\[', '\\]'],
+    ],
+  },
+}
 
 export default {
   name: 'NodeView',

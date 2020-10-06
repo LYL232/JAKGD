@@ -34,9 +34,9 @@
 </template>
 
 <script>
-import MarkdownBlock from '../markdown/MarkdownBlock'
-import qs from 'qs'
-import ChangeCardNameDialog from './ChangeCardNameDialog'
+const MarkdownBlock = () => import('../markdown/MarkdownBlock'),
+  qs = () => import('qs'),
+  ChangeCardNameDialog = () => import('./ChangeCardNameDialog')
 
 export default {
   name: 'NodeCardList',

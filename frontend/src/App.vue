@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Home from './components/home/Home'
+const Home = () => import('./components/home/Home')
 export default {
   name: 'App',
   data() {

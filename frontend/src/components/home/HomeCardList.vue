@@ -17,8 +17,10 @@
 </template>
 
 <script>
+// 首页优先加载图展示组件
 import GraphCard from './card/GraphCard'
-import GraphDataTableCard from './card/GraphDataTableCard'
+
+const GraphDataTableCard = () => import( './card/GraphDataTableCard')
 
 export default {
   name: 'CardList',

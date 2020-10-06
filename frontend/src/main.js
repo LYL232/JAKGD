@@ -12,32 +12,6 @@ import 'mavon-editor/dist/css/index.css'
 import globalData from './global-data'
 import util from './util'
 
-// 识别latex语法的MathJax的配置
-// noinspection JSUnusedGlobalSymbols
-window.MathJax.config = {
-  startup: {
-    ready: () => {
-      window.MathJax.startup.defaultReady()
-      window.MathJax.startup.promise.then(() => {})
-    },
-  },
-  tags: 'all', // 为方程式编号
-  tagSide: 'left', // 方程式编号的位置
-  tex: {
-    processEscapes: true,
-    processEnvironments: true, // process \begin{xxx}...\end{xxx} outside math mode
-    processRefs: true, // process \ref{...} outside of math mode
-    inlineMath: [
-      ['$', '$'],
-      ['\\(', '\\)'],
-    ],
-    displayMath: [ // start/end delimiter pairs for display math
-      ['$$', '$$'],
-      ['\\[', '\\]'],
-    ],
-  },
-}
-
 // 事件传输总线
 Vue.prototype.bus = new Vue()
 // 全局数据
