@@ -31,11 +31,11 @@ export default {
   },
   /**
    * 生成[a, b)之间随机数
-   * @param a
-   * @param b
-   * @returns {*}
+   * @param a {number}
+   * @param b {number}
+   * @returns {number}
    */
-  randomNumInRangeWithA(a, b) {
+  randomNumInRange(a, b) {
     return a + Math.floor(Math.random() * (b - a)) //舍去
   }
 }

@@ -405,7 +405,7 @@ class GraphWindow {
       // .force('y', d3.force().strength(0.002))
       .force('collide', d3.forceCollide().radius(function(node) {
         // TODO: 最小碰撞体积与节点属性有关
-        return options.minCollision + node.id
+        return options.minCollision + 40 + node.id / 25
       }).iterations(2)).
       force('charge', d3.forceManyBody()).
       force('link', d3.forceLink().id(function(relationship) {
@@ -457,16 +457,36 @@ class GraphWindow {
    * @param nodeIdSet {Set} 节点id集合
    */
   addHighlightNode(nodeIdSet) {
+    let highlightNodeIdSet = this._highlightNodeIdSet
     for (let id of nodeIdSet) {
-      this._highlightNodeIdSet.add(id)
+      highlightNodeIdSet.add(id)
     }
+    // 选取所有节点图形更新其class
+    this._svgNodes.selectAll('.node').attr('class', function(node) {
+      // noinspection JSUnresolvedFunction
+      let oldClasses = d3.select(this).attr('class')
+      if (highlightNodeIdSet.has(node.id)) {
+        if (oldClasses.indexOf('node-highlighted') === -1) {
+          return oldClasses + ' node-highlighted'
+        } else {
+          return oldClasses
+        }
+      } else {
+        return oldClasses
+      }
+    })
   }
 
   /**
    * 清空高亮节点集
    */
   clearHighlightNodeSet() {
-    this._highlightNodeIdSet.clear()
+    let highlightNodeIdSet = this._highlightNodeIdSet
+    highlightNodeIdSet.clear()
+    this._svgNodes.selectAll('.node').attr('class', function() {
+      // noinspection JSUnresolvedFunction
+      return d3.select(this).attr('class').replace('node-highlighted', '')
+    })
   }
 
   /**

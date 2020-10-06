@@ -134,7 +134,14 @@ export default {
           that.addNodeViewTab(node)
         },
       })
-      this.graphWindow.appendGraph(this.graphData)
+      // 初始化时随机选择一个节点高亮并固定在屏幕的指定位置
+      this.nodeSelected = this.graphData.nodes[
+        this.util.randomNumInRange(0, this.graphData.nodes.length)]
+      // TODO: 将被选择的节点放在图窗口的中心位置
+      this.graphWindow.appendGraph(this.graphData,
+        new Map().set(this.nodeSelected.id, {x: 400, y: 300}))
+      this.graphWindow.stickNode(this.nodeSelected.id)
+      this.graphWindow.addHighlightNode(new Set().add(this.nodeSelected.id))
     }
   },
   methods: {
