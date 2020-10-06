@@ -23,7 +23,9 @@
                        @click="clickExpandButton" :loading="expandButtonLoading"></el-button>
             <el-button type="primary" icon="el-icon-document" @click="clickDocumentButton"></el-button>
             <el-button type="primary" icon="el-icon-circle-close"
-                       @click="clickRemoveButton" :loading="removeButtonLoading"></el-button>
+                       @click="clickRemoveButton"></el-button>
+            <el-button type="danger" icon="el-icon-delete"
+                       @click="clickDeleteButton" :loading="deleteButtonLoading"></el-button>
           </el-button-group>
         </el-col>
       </el-row>
@@ -45,7 +47,7 @@ export default {
       // 图展示对象
       graphWindow: null,
       expandButtonLoading: false,
-      removeButtonLoading: false,
+      deleteButtonLoading: false,
     }
   },
   props: {
@@ -203,6 +205,31 @@ export default {
         ),
       })
       this.nodeSelected = null
+    },
+    clickDeleteButton() {
+      this.$confirm('确定删除此节点? 要求节点不能有关系且联系着的文档. ', '删除节点', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        this.deleteButtonLoading = true
+        this.axios.delete('/api/node/' + this.nodeSelected.id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功',
+          })
+          this.graphWindow.removeGraph({
+            nodeIdSet: new Set().add(
+              this.nodeSelected.id,
+            ),
+          })
+          this.deleteButtonLoading = false
+          this.nodeSelected = null
+        }).catch((err) => {
+          this.util.errorHint(err, '删除节点失败')
+          this.deleteButtonLoading = false
+        })
+      })
     },
   },
 }
