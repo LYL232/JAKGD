@@ -16,8 +16,7 @@ body {
 .graph-window-info {
   font-size: 16px;
   padding: 10px;
-  position: absolute;
-  width: 40%;
+  width: 100%;
 }
 
 .graph-window-info a {

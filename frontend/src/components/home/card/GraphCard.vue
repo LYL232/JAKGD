@@ -1,36 +1,41 @@
 <template>
-  <el-card class="card" :style="hasData() ? 'height:700px' : ''">
+  <el-card class="card" :style="hasData() ? 'height:auto' : ''">
     <div slot="header" class="clear-fix">
       <el-row>
-        <el-col :span="8">
+        <h3 v-if="cardTitle && cardTitle !== ''"
+            style="text-align: center; display: inline">
+          {{cardTitle}}</h3>
+        <el-button style="float:right" type="warning"
+                   icon="el-icon-error" circle size="medium"
+                   @click="clickCloseButton"/>
+      </el-row>
+    </div>
+    <el-row>
+      <el-col :span="18">
+        <div :id="'graph-window-' + cardId" :style="hasData() ? 'height:550px;' : ''"/>
+      </el-col>
+      <el-col :span="6">
+        <el-row style="float: right; margin-left: 10px;">
           <el-button type="primary" icon="el-icon-error"
-                     @click="nodeSelected = null" size="mini" circle
-                     v-if="nodeSelected"></el-button>
+                     @click="clearNodeSelected" size="mini" circle
+                     v-if="nodeSelected"/>
           <h3 v-if="nodeSelected" style="display: inline">
             {{util.getNodeTitle(nodeSelected)}}
           </h3>
-          <h3 v-if="!nodeSelected">()</h3>
-        </el-col>
-        <el-col :span="8" style="align-items: center">
-          <h3 v-if="cardTitle && cardTitle !== ''" style="text-align: center">{{cardTitle}}</h3>
-        </el-col>
-        <el-col :span="8" style="float:right">
-          <el-button style="float:right" type="warning"
-                     icon="el-icon-error" circle size="small"
-                     @click="clickCloseButton"></el-button>
-          <el-button-group v-if="nodeSelected" style="float:right; margin-right: 10px;">
-            <el-button type="primary" icon="el-icon-share"
-                       @click="clickExpandButton" :loading="expandButtonLoading"></el-button>
-            <el-button type="primary" icon="el-icon-document" @click="clickDocumentButton"></el-button>
-            <el-button type="primary" icon="el-icon-circle-close"
-                       @click="clickRemoveButton"></el-button>
-            <el-button type="danger" icon="el-icon-delete"
-                       @click="clickDeleteButton" :loading="deleteButtonLoading"></el-button>
-          </el-button-group>
-        </el-col>
-      </el-row>
-    </div>
-    <div :id="'graph-window-' + cardId" :style="hasData() ? 'height:550px' : ''"></div>
+          <h3 v-if="!nodeSelected && hasData()">()</h3>
+        </el-row>
+        <el-button-group v-if="nodeSelected" style="margin: 10px; float: right;">
+          <el-button type="primary" icon="el-icon-share"
+                     @click="clickExpandButton" :loading="expandButtonLoading"></el-button>
+          <el-button type="primary" icon="el-icon-document" @click="clickDocumentButton"></el-button>
+          <el-button type="primary" icon="el-icon-circle-close"
+                     @click="clickRemoveButton"></el-button>
+          <el-button type="danger" icon="el-icon-delete"
+                     @click="clickDeleteButton" :loading="deleteButtonLoading"></el-button>
+        </el-button-group>
+        <div :id="'graph-window-' + cardId + 'info'" style="display: inline"/>
+      </el-col>
+    </el-row>
     <span v-if="!hasData()">没有数据</span>
   </el-card>
 </template>
@@ -129,10 +134,12 @@ export default {
       this.graphWindow = new GraphWindow('#graph-window-' + this.cardId, {
         onNodeClick: function(node) {
           that.nodeSelected = node
+          that.graphWindow.setHighlightNodeSet(new Set().add(node.id))
         },
         onNodeDoubleClick: function(node) {
           that.addNodeViewTab(node)
         },
+        infoPanelSelector: '#graph-window-' + this.cardId + 'info',
       })
       // 初始化时随机选择一个节点高亮并固定在屏幕的指定位置
       this.nodeSelected = this.graphData.nodes[
@@ -141,7 +148,7 @@ export default {
       this.graphWindow.appendGraph(this.graphData,
         new Map().set(this.nodeSelected.id, {x: 400, y: 300}))
       this.graphWindow.stickNode(this.nodeSelected.id)
-      this.graphWindow.addHighlightNode(new Set().add(this.nodeSelected.id))
+      this.graphWindow.setHighlightNodeSet(new Set().add(this.nodeSelected.id))
     }
   },
   methods: {
@@ -211,6 +218,10 @@ export default {
           this.nodeSelected.id,
         ),
       })
+      this.clearNodeSelected()
+    },
+    clearNodeSelected() {
+      this.graphWindow.clearHighlightNodeSet()
       this.nodeSelected = null
     },
     clickDeleteButton() {

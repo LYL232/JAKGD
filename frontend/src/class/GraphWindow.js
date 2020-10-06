@@ -1,4 +1,5 @@
 // 参考 neo4jd3 源码修改而来
+// reference: https://github.com/eisman/neo4jd3
 
 import globalData from '../global-data'
 import util from '../util'
@@ -353,8 +354,8 @@ class GraphWindow {
       onNodeDragEnd: null,
       // 双击关系回调函数
       onRelationshipDoubleClick: null,
-      // 是否展示属性信息面板
-      showInfoPanel: true,
+      // 属性信息面板选择器, 如果没有, 则不显示属性面板
+      infoPanelSelector: null,
       // 节点默认半径
       nodeRadius: 25,
       // 图标
@@ -404,8 +405,9 @@ class GraphWindow {
     // noinspection JSUnresolvedFunction
     this._container.attr('class', 'graph-window').html('')
 
-    if (options.showInfoPanel) {
-      this._infoPanel = new InfoPanel(this._container)
+    if (options.infoPanelSelector) {
+      // noinspection JSUnresolvedFunction
+      this._infoPanel = new InfoPanel(d3.select(options.infoPanelSelector))
     }
 
     // noinspection JSUnresolvedFunction
@@ -500,14 +502,36 @@ class GraphWindow {
   }
 
   /**
-   * 增加高亮的节点
+   * 设置高亮的节点
    * @param nodeIdSet {Set} 节点id集合
    */
-  addHighlightNode(nodeIdSet) {
+  setHighlightNodeSet(nodeIdSet) {
+    this._highlightNodeIdSet = new Set(nodeIdSet)
+    this._updateHighlightNode()
+  }
+
+  /**
+   * 清空高亮节点集
+   */
+  clearHighlightNodeSet() {
+    this._highlightNodeIdSet.clear()
+    this._updateHighlightNode()
+  }
+
+  /**
+   * 节点数量
+   * @returns {number}
+   */
+  nodeCount() {
+    return this._nodeMap.size
+  }
+
+  /**
+   * 更新节点的高亮状态
+   * @private
+   */
+  _updateHighlightNode() {
     let highlightNodeIdSet = this._highlightNodeIdSet
-    for (let id of nodeIdSet) {
-      highlightNodeIdSet.add(id)
-    }
     // 选取所有节点图形更新其class
     this._svgNodes.selectAll('.node').attr('class', function(node) {
       // noinspection JSUnresolvedFunction
@@ -519,29 +543,9 @@ class GraphWindow {
           return oldClasses
         }
       } else {
-        return oldClasses
+        return oldClasses.replace('node-highlighted', '')
       }
     })
-  }
-
-  /**
-   * 清空高亮节点集
-   */
-  clearHighlightNodeSet() {
-    let highlightNodeIdSet = this._highlightNodeIdSet
-    highlightNodeIdSet.clear()
-    this._svgNodes.selectAll('.node').attr('class', function() {
-      // noinspection JSUnresolvedFunction
-      return d3.select(this).attr('class').replace('node-highlighted', '')
-    })
-  }
-
-  /**
-   * 节点数量
-   * @returns {number}
-   */
-  nodeCount() {
-    return this._nodeMap.size
   }
 
   /**
