@@ -1,8 +1,17 @@
 // 参考 neo4jd3 源码修改而来
 
 import globalData from '../global-data'
+import util from '../util'
 
-const d3 = require('d3')
+const d3 = require('d3'),
+  // 内部属性集(不展示)
+  internalProperties = globalData.internalProperties,
+  // 属性名字映射(内部表示=>外部表示)
+  propertyNameMap = globalData.propertyNameMap,
+  // 标签名字映射
+  nodeLabelNameMap = globalData.nodeLabelNameMap,
+  // 关系类型名字映射
+  relationshipTypeNameMap = globalData.relationshipTypeNameMap
 
 // 合并两个对象
 function merge(target, source) {
@@ -94,19 +103,57 @@ function unitaryNormalVector(source, target, newLength) {
 
 /**
  * 获得指定颜色的暗色
- * @param color 颜色字符串
- * @returns String
+ * @param color {string} 颜色字符串
+ * @param k {number} 对比程度
+ * @returns {string} 颜色字符串
  */
-function darkerColor(color) {
+function darkerColor(color, k = 1) {
   // noinspection JSUnresolvedFunction
-  return d3.rgb(color).darker(1)
+  return d3.rgb(color).darker(k)
 }
 
-// 内部属性集(不展示), 属性名字映射(内部表示=>外部表示), 标签名字映射
-let internalProperties = globalData.internalProperties,
-  propertyNameMap = globalData.propertyNameMap,
-  nodeLabelNameMap = globalData.nodeLabelNameMap,
-  relationshipTypeNameMap = globalData.relationshipTypeNameMap
+/**
+ * 获得指定颜色的亮色
+ * @param color {string} 颜色字符串
+ * @param k {number} 对比程度
+ * @returns {string} 颜色字符串
+ */
+function brighterColor(color, k = 1) {
+  // noinspection JSUnresolvedFunction
+  return d3.rgb(color).brighter(k)
+}
+
+/**
+ * 用于给一个区域描边, 如果颜色过暗则边较亮, 否则较暗
+ * @param color {string} 颜色字符串
+ * @returns {string} 颜色字符串
+ */
+function borderColor(color) {
+  let rgb = util.string2RGB(color), sum = rgb.r + rgb.g + rgb.b,
+    k = 1 + Math.abs(sum - 384) / 192
+  // 128 * 3 == 384
+  return (sum >= 384) ? darkerColor(util.RGB2String(rgb), k) :
+    brighterColor(util.RGB2String(rgb), k)
+}
+
+/**
+ * 混合颜色
+ * @param rgbList [{r:number, g:number, b: number}]
+ * @returns {{r:number, g:number, b: number}}
+ */
+function mixColor(rgbList) {
+  if (rgbList.length === 0) {
+    return {r: 255, g: 255, b: 255}
+  }
+  let rgb = rgbList[0]
+  for (let i = 1; i < rgbList.length; ++i) {
+    let other = rgbList[i]
+    rgb.r = Math.floor(rgb.r * other.r / 255)
+    rgb.g = Math.floor(rgb.g * other.g / 255)
+    rgb.b = Math.floor(rgb.b * other.b / 255)
+  }
+  return rgb
+}
 
 /**
  * 用于图展示的node对象, 有x, y等展示时需要的属性, 而且会修改一些属性名,
@@ -788,10 +835,21 @@ class GraphWindow {
         return options.nodeRadius + node.id / 25
       }).
       style('fill', function(node) {
-        return that._class2color(node.labels[0])
+        if (node.labels.length === 0) {
+          return '#ffffff'
+        }
+        let classColors = []
+        for (let label of node.labels) {
+          classColors.push(util.string2RGB(that._class2color(label)))
+        }
+        return util.RGB2String(mixColor(classColors))
       }).
       style('stroke', function(node) {
-        return darkerColor(that._class2color(node.labels[0]))
+        let classColors = []
+        for (let label of node.labels) {
+          classColors.push(util.string2RGB(that._class2color(label)))
+        }
+        return borderColor(util.RGB2String(mixColor(classColors)))
       }).
       append('title').
       text(function(node) {
