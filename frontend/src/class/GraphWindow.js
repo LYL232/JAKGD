@@ -595,8 +595,8 @@ class GraphWindow {
       // 转换并注册关系到relationshipMap中
       relationships.forEach((relationship) => {
         // 设置关系的起点和终点对象
-        let target = this._nodeMap.get(relationship.startNode),
-          source = this._nodeMap.get(relationship.endNode)
+        let target = this._nodeMap.get(relationship.endNode),
+          source = this._nodeMap.get(relationship.startNode)
         if (source && target) {
           this._relationshipMap.set(relationship.id, relationship)
         } else {
