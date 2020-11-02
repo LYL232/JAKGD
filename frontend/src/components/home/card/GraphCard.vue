@@ -12,7 +12,7 @@
     </div>
     <el-row>
       <el-col :span="18">
-        <div :id="'graph-window-' + cardId" :style="hasData() ? 'height:550px;' : ''"/>
+        <div :id="'graph-window-' + cardId" :style="hasData() ? 'height:' + windowHeight * 0.7 + 'px;' : ''"/>
       </el-col>
       <el-col :span="6">
         <el-row style="float: right; margin-left: 10px;">
@@ -53,6 +53,7 @@ export default {
       graphWindow: null,
       expandButtonLoading: false,
       deleteButtonLoading: false,
+      windowHeight: document.documentElement.clientHeight,
     }
   },
   props: {

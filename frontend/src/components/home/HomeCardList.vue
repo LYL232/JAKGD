@@ -72,7 +72,7 @@ export default {
 
 <style scoped>
   .card-view {
-    width: 1200px;
+    width: 70%;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 40px;

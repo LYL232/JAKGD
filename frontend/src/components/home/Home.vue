@@ -1,46 +1,57 @@
 <template>
   <div style="width:100%">
-    <el-tabs v-model="currentTabName" type="card" @tab-remove="removeTab">
-      <el-tab-pane
-              :name="mainTabName"
-              :closable=false
-      >
-        <span slot="label"><i class="el-icon-share"></i> 主页</span>
-        <el-container class="header">
-          <el-container>
-            <el-avatar v-if="!username || username === ''">登录</el-avatar>
-            <el-avatar v-if="username">{{username}}</el-avatar>
-            <el-button v-if="!username || username === ''"
-                       style="margin-left:10px" type="primary" icon="el-icon-user" circle
-                       @click="clickUserButton"></el-button>
-            <el-button style="margin-left: 10px" v-if="username"
-                       size="small" type="warning" round
-                       @click="clickLogoutButton">注销
-            </el-button>
-            <el-button style="margin-left: 10px" v-if="username"
-                       size="small" type="primary" round
-                       @click="clickChangePasswordButton">修改密码
-            </el-button>
-          </el-container>
-          <el-button type="primary" style="margin-right: 10px;"
-                     icon="el-icon-circle-plus" circle @click="clickCreateNodeButton"></el-button>
-          <el-input class="search-input" placeholder="搜索: id, 标签, 摘要" v-model="searchString" clearable></el-input>
-          <el-button @click="clickSearchButton" class="search-button" round
-                     icon="el-icon-search" :loading="searchButtonLoading"></el-button>
-        </el-container>
-        <card-list/>
-      </el-tab-pane>
-      <el-tab-pane
-              v-for="item in tabs"
-              :key="'tab-' + item.name"
-              :label="item.label"
-              :name="item.name"
-              :closable=true>
-        <markdown-editor v-if="item.type === 'md-editor'" :doc="item.doc"
-                         :header="item.header" :node="item.node"/>
-        <node-view v-if="item.type === 'node-view'" :node-id="item.node.id"/>
-      </el-tab-pane>
-    </el-tabs>
+    <el-container class="header">
+      <el-container>
+        <img alt="home-logo" src="../../assets/home-logo.png" id="home-logo"/>
+        <el-avatar class="header-items" v-if="username">{{username}}</el-avatar>
+        <el-button v-if="!username || username === ''"
+                   class="header-items" type="primary" icon="el-icon-user"
+                   @click="clickUserButton" circle/>
+        <el-button-group class="header-items">
+          <el-button type="primary" v-if="username"
+                     icon="el-icon-circle-plus" round @click="clickCreateNodeButton"/>
+          <el-button v-if="username" type="primary" round
+                     @click="clickChangePasswordButton">修改密码
+          </el-button>
+          <el-button v-if="username" type="warning" round
+                     @click="clickLogoutButton">注销
+          </el-button>
+        </el-button-group>
+      </el-container>
+      <el-input prefix-icon="el-icon-search" class="search-input header-items" placeholder="id, 标签, 摘要" v-model="searchString"
+                clearable>
+        <el-button @click="clickSearchButton" slot="append"
+                   icon="el-icon-search" :loading="searchButtonLoading"/>
+      </el-input>
+
+    </el-container>
+    <div>
+      <el-tabs v-model="currentTabName" type="card" @tab-remove="removeTab">
+        <el-tab-pane
+            :name="mainTabName"
+            :closable=false
+        >
+          <span slot="label"><i class="el-icon-share"></i> 主页</span>
+          <card-list/>
+        </el-tab-pane>
+        <el-tab-pane
+            v-for="item in tabs"
+            :key="'tab-' + item.name"
+            :label="item.label"
+            :name="item.name"
+            :closable=true>
+          <markdown-editor v-if="item.type === 'md-editor'" :doc="item.doc"
+                           :header="item.header" :node="item.node"/>
+          <node-view v-if="item.type === 'node-view'" :node-id="item.node.id"/>
+        </el-tab-pane>
+      </el-tabs>
+      <el-divider/>
+      <el-footer class="footer">
+        <p style="font-size: 5px; float: right;">
+          ©Copyright 2020 LYL232 版权所有
+        </p>
+      </el-footer>
+    </div>
     <login-dialog ref="loginDialog"></login-dialog>
     <edit-node-dialog ref="editNodeDialog" @created="nodeCreated"></edit-node-dialog>
     <change-password-dialog ref="changePasswordDialog"></change-password-dialog>
@@ -236,9 +247,9 @@ export default {
 
 <style scoped>
   .header {
-    width: 75%;
-    margin-left: auto;
-    margin-right: auto;
+    box-shadow: lightblue 0 0 0 1px;
+    height: auto;
+    padding: 20px 15%;
   }
 
   .search-input {
@@ -246,9 +257,15 @@ export default {
     height: 40px;
   }
 
-  .search-button {
-    width: 60px;
-    height: 40px;
-    margin-left: 10px !important;
+  .header-items {
+    margin: auto 5px;
+  }
+
+
+  #home-logo {
+    width: 100px;
+    height: 75px;
+    max-width: 100%;
+    max-height: 100%;
   }
 </style>
