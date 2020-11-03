@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import NotFound from './components/NotFound'
 
 // 引入组件
 const Home = () => import('./components/home/Home'),
@@ -20,10 +21,14 @@ const routes = [
   {
     path: '/me',
     component: Me
+  },
+  {
+    path: '*',
+    component: NotFound
   }
 ]
 
-var router = new VueRouter({
+const router = new VueRouter({
   routes, mode: 'history'
 })
 export default router
