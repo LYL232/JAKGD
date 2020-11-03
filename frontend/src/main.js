@@ -11,6 +11,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'mavon-editor/dist/css/index.css'
 import globalData from './global-data'
 import util from './util'
+import router from './router'
 
 // 事件传输总线
 Vue.prototype.bus = new Vue()
@@ -89,4 +90,5 @@ util.$notify = Vue.prototype.$notify
 // noinspection JSUnusedGlobalSymbols
 new Vue({
   render: h => h(App),
+  router,
 }).$mount('#app')

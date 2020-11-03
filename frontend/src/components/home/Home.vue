@@ -1,5 +1,5 @@
 <template>
-  <div style="width:100%">
+  <div>
     <el-container class="header">
       <el-container>
         <img alt="home-logo" src="../../assets/home-logo.png" id="home-logo"/>
@@ -7,18 +7,17 @@
         <el-button v-if="!username || username === ''"
                    class="header-items" type="primary" icon="el-icon-user"
                    @click="clickUserButton" circle/>
-        <el-button-group class="header-items">
-          <el-button type="primary" v-if="username"
-                     icon="el-icon-circle-plus" round @click="clickCreateNodeButton"/>
-          <el-button v-if="username" type="primary" round
-                     @click="clickChangePasswordButton">修改密码
-          </el-button>
-          <el-button v-if="username" type="warning" round
-                     @click="clickLogoutButton">注销
+        <el-button-group class="header-items" v-if="username">
+          <el-button class="header-items" type="success" icon="el-icon-user"
+                     @click="clickToMeButton" round/>
+          <el-button type="primary" icon="el-icon-circle-plus"
+                     @click="clickCreateNodeButton" round/>
+          <el-button type="warning" @click="clickLogoutButton" round>注销
           </el-button>
         </el-button-group>
       </el-container>
-      <el-input prefix-icon="el-icon-search" class="search-input header-items" placeholder="id, 标签, 摘要" v-model="searchString"
+      <el-input prefix-icon="el-icon-search" class="search-input header-items" placeholder="id, 标签, 摘要"
+                v-model="searchString"
                 clearable>
         <el-button @click="clickSearchButton" slot="append"
                    icon="el-icon-search" :loading="searchButtonLoading"/>
@@ -54,7 +53,6 @@
     </div>
     <login-dialog ref="loginDialog"></login-dialog>
     <edit-node-dialog ref="editNodeDialog" @created="nodeCreated"></edit-node-dialog>
-    <change-password-dialog ref="changePasswordDialog"></change-password-dialog>
   </div>
 </template>
 
@@ -65,7 +63,6 @@ import CardList from './HomeCardList'
 const MarkdownEditor = () => import( '../markdown/MarkdownEditor'),
   NodeView = () => import('../node/NodeView'),
   LoginDialog = () => import( './LoginDialog'),
-  ChangePasswordDialog = () => import( './ChangePasswordDialog'),
   EditNodeDialog = () => import( '../node/EditNodeDialog')
 
 export default {
@@ -115,6 +112,11 @@ export default {
     })
   },
   mounted() {
+    if (this.globalData.user) {
+      this.username = this.globalData.user.username
+    } else {
+      this.username = null
+    }
     this.clickSearchButton()
   },
   methods: {
@@ -238,13 +240,12 @@ export default {
     clickUserButton() {
       this.$refs.loginDialog.show()
     },
-    clickChangePasswordButton() {
-      this.$refs.changePasswordDialog.show()
-    },
+    clickToMeButton() {
+      this.$router.push('/me')
+    }
   },
   components: {
     EditNodeDialog,
-    ChangePasswordDialog,
     LoginDialog,
     CardList, MarkdownEditor, NodeView,
   },
@@ -266,7 +267,6 @@ export default {
   .header-items {
     margin: auto 5px;
   }
-
 
   #home-logo {
     width: 100px;

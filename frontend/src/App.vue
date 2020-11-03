@@ -1,9 +1,8 @@
 <template>
-  <home/>
+  <router-view/>
 </template>
 
 <script>
-const Home = () => import('./components/home/Home')
 export default {
   name: 'App',
   data() {
@@ -11,7 +10,6 @@ export default {
       activeIndex: '1',
     }
   },
-  components: {Home,},
 }
 </script>
 
