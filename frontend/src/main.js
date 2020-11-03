@@ -23,9 +23,9 @@ axios.defaults.baseURL = window.location.origin
 // 请求拦截器
 axios.interceptors.request.use(
   config => {
-    if (globalData.authorization) {
+    if (globalData.user && globalData.user.authorization) {
       // 加入服务器认证请求头
-      config.headers.Authorization = globalData.authorization
+      config.headers.Authorization = globalData.user.authorization
     }
     return config
   },
@@ -52,8 +52,11 @@ axios.interceptors.response.use(
           error.errorMsg = globalData.responseCodeMessage[data.code]
             + ': ' + data.message
           if (data.code === 1) {
-            if (globalData.authorization) {
-              Vue.prototype.bus.$emit('authorizationExpired')
+            if (globalData.user) {
+              this.bus.$emit('authorizationChange', {
+                username: null,
+                authorization: null,
+              })
             }
           }
         } else {

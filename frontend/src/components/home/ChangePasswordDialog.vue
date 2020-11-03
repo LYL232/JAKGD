@@ -55,11 +55,11 @@ export default {
 
         // 重新登录
         this.axios.post('/login', {
-          username: this.globalData.username,
+          username: this.globalData.user.username,
           password: this.form.password,
         }).then((response) => {
           this.bus.$emit('authorizationChange', {
-            username: this.globalData.username,
+            username: this.globalData.user.username,
             authorization: response.headers['authorization'],
           })
         }).catch((err) => {

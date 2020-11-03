@@ -104,8 +104,14 @@ export default {
       this.currentTabName = this.mainTabName
     })
     this.bus.$on('authorizationChange', ({username, authorization}) => {
-      this.username = this.globalData.username = username
-      this.globalData.authorization = authorization
+      if (!username || username === '' || !authorization) {
+        this.globalData.user = null
+        return
+      }
+      this.globalData.user = {
+        username, authorization
+      }
+      this.username = username
     })
   },
   mounted() {

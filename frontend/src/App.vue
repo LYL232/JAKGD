@@ -12,15 +12,6 @@ export default {
     }
   },
   components: {Home,},
-  created() {
-    let that = this
-    this.bus.$on('authorizationExpired', () => {
-      that.bus.$emit('authorizationChange', {
-        username: null,
-        authorization: null,
-      })
-    })
-  },
 }
 </script>
 

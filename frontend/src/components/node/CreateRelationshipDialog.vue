@@ -90,7 +90,7 @@ export default {
         return
       }
 
-      if (!this.globalData.username || this.globalData.username === '') {
+      if (!this.globalData.user) {
         this.$notify.info({
           title: '未认证',
           message: '请登录',
