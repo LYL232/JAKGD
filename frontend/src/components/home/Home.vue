@@ -103,6 +103,7 @@ export default {
     this.bus.$on('authorizationChange', ({username, authorization}) => {
       if (!username || username === '' || !authorization) {
         this.globalData.user = null
+        this.username = null
         return
       }
       this.globalData.user = {
