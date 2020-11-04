@@ -71,9 +71,13 @@ public class DocumentService extends BaseService {
             throw new ObjectNotFoundException("Node id: " + id);
         }
         String now = getFormatNowDateStringBySecond();
-        return documentRepository.createPartDocument(
+        Long result = documentRepository.createPartDocument(
                 id, "markdown", docName, content, now, now, author, dCount
         );
+        if (result == null) {
+            throw new ObjectNotFoundException("Node id: " + id);
+        }
+        return result;
     }
 
     /**

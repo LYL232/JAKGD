@@ -18,7 +18,7 @@ public interface DocumentRepository extends Neo4jRepository<Document, Long> {
             "return m as document order by r.index")
     List<Document> getNodeDocuments(@Param("id") Long id);
 
-    @Query("match (n:__knowledge) where id(n) = $nodeId " +
+    @Query("match (n) where id(n) = $nodeId " +
             "create (m:__document:__internal{type: $type, name: $name, content: $content, " +
             "created: $created, updated: $updated, author: $author})" +
             "-[r:__part_of{index: $index}]->(n) return id(m)")
@@ -28,21 +28,21 @@ public interface DocumentRepository extends Neo4jRepository<Document, Long> {
             @Param("created") String created, @Param("updated") String updated,
             @Param("author") String author, @Param("index") Integer index);
 
-    @Query("match (n:__document)-[r:__part_of]->(m:__knowledge) " +
+    @Query("match (n:__document)-[r:__part_of]->(m) " +
             "where id(n) = $dId and r.index > 0 and id(m) = $nodeId " +
             "with r as nr " +
-            "match (n:__document)-[r:__part_of]->(m:__knowledge) " +
+            "match (n:__document)-[r:__part_of]->(m) " +
             "where id(n) <> $dId and id(m) = $nodeId and r.index = nr.index - 1 " +
             "set r.index = r.index + 1, nr.index = nr.index - 1")
     void switchDocumentUpward(@Param("nodeId") Long nodeId, @Param("dId") Long dId);
 
-    @Query("match (n:__document)-[r:__part_of]->(m:__knowledge) " +
+    @Query("match (n:__document)-[r:__part_of]->(m) " +
             "where id(m) = $nodeId " +
             "with count(r) as tot " +
-            "match (n:__document)-[r:__part_of]->(m:__knowledge) " +
+            "match (n:__document)-[r:__part_of]->(m) " +
             "where id(n) = $dId and r.index < tot - 1 and id(m) = $nodeId " +
             "with r as nr " +
-            "match (n:__document)-[r:__part_of]->(m:__knowledge) " +
+            "match (n:__document)-[r:__part_of]->(m) " +
             "where id(n) <> $dId and r.index = nr.index + 1 and id(m) = $nodeId " +
             "set r.index = r.index - 1, nr.index = nr.index + 1")
     void switchDocumentDownward(@Param("nodeId") Long nodeId, @Param("dId") Long dId);
@@ -50,7 +50,7 @@ public interface DocumentRepository extends Neo4jRepository<Document, Long> {
     @Query("match (:__document)-[r:__part_of]->(n) where id(n) = $id return count(r)")
     Integer getPartDocumentsCount(@Param("id") Long id);
 
-    @Query("match(n:__document)-[r:__part_of]->(m:__knowledge) " +
+    @Query("match(n:__document)-[r:__part_of]->(m) " +
             "where id(m) = $kId and r.index > $index " +
             "set r.index = r.index - 1")
     void correctPartOfIndex(@Param("kId") Long kId, @Param("index") Integer index);

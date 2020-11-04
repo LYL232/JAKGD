@@ -99,7 +99,6 @@ public class DocumentController extends BaseController {
             if (content.isEmpty()) {
                 return notAllowEmptyBodyResponse();
             }
-//            content = "'" + mdContentHeader + content + "'";
             return new ResponseEntity<>(documentService.create(nodeId, username, docName, content), HttpStatus.CREATED);
         } else {
             return invalidParameterResponse("unknown Document type: " + type);
