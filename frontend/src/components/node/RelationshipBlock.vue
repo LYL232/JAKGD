@@ -5,18 +5,14 @@
             @relationship-deleted="$emit('relationship-deleted')"
             @edit-relationship="editRelationship"
             :node="each.startNode" :relationship="each.relationship"/>
-    <div v-if="asEndNode.length > 0" style="display: inline">
-      <i class="el-icon-d-arrow-right"/>
-      <p style="display: inline">{{type}}</p>
-      <i class="el-icon-d-arrow-right"/>
+    <div v-if="asEndNode.length > 0" class="relationship-type">
+      <h3 style="display: inline">{{type}}</h3>
     </div>
-    <p v-if="node.properties.name" style="display: inline">
-      ({{node.id}}):{{node.properties.name}}
-    </p>
-    <div v-if="asStartNode.length > 0" style="display: inline">
-      <i class="el-icon-d-arrow-right"/>
-      <p style="display: inline">{{type}}</p>
-      <i class="el-icon-d-arrow-right"/>
+    <span v-if="node.properties.name" style="font-weight: bold;">
+      (this)
+    </span>
+    <div v-if="asStartNode.length > 0" class="relationship-type">
+      <h3 style="display: inline">{{type}}</h3>
     </div>
     <popover-node-director
             v-for="(each, i) in asStartNode" :key="'as-start-node-' + i"
@@ -54,5 +50,9 @@ export default {
 </script>
 
 <style scoped>
-
+  .relationship-type {
+    display: inline;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
 </style>

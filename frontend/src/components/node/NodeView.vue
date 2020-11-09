@@ -1,89 +1,96 @@
 <template>
-  <div>
-    <edit-relationship-dialog
-            ref="editRelationshipDialog" @edited="updateRelationships"/>
+  <div class="node-view">
     <div v-if="node">
-      <create-relationship-dialog :node="node" ref="createRelationshipDialog"
-                                  @created="updateRelationships"/>
-      <add-node-card-dialog ref="addCardDialog" :node="node"/>
-      <edit-node-dialog ref="editNodeDialog" :node="node"
-                        @edited="fetchAndUpdateBaseInfo"/>
-      <div style="padding: 10px 20px">
-        <div style="margin-bottom: 10px">
-          <div style="align-items: center; height: 50px">
-            <popover-node-director
-                    v-for="(item, i) in references" :key="'popover-ref' + i"
-                    @relationship-deleted="updateRelationships"
-                    @edit-relationship="editRelationship"
-                    :node="item.node" :relationship="item.relationship"/>
-            <i v-if="references.length > 0" class="el-icon-d-arrow-right"/>
-            <h1 v-if="node.properties.name" style="display: inline">({{node.id}}):{{node.properties.name}}</h1>
-            <h1 v-if="!node.properties.name" style="display: inline">{{node.id}}:无名</h1>
-
-            <i v-if="applications.length > 0" class="el-icon-d-arrow-right"/>
-
-            <popover-node-director
-                    v-for="(item, i) in applications"
-                    @relationship-deleted="relationshipDeleted(applications, i)"
-                    @edit-relationship="editRelationship"
-                    :key="'popover-app' + i" :node="item.node"
-                    :relationship="item.relationship"/>
-
-            <h3 style="display: inline; float: right">作者:{{node.properties.author}}</h3>
-          </div>
-          <div>
-            <el-button-group style="float:right">
-              <el-button type="primary" icon="el-icon-refresh-right" :loading="buttonLoading"
-                         @click="updateAll"/>
-              <el-button type="primary" icon="el-icon-edit" :loading="buttonLoading"
-                         @click="$refs.editNodeDialog.show()"/>
-              <el-button type="primary" icon="el-icon-share" :loading="buttonLoading"
-                         @click="clickExpandButton"/>
-              <el-button type="primary" icon="el-icon-document-add" :loading="buttonLoading"
-                         @click="$refs.addCardDialog.show()"/>
-              <el-button type="primary" icon="el-icon-connection" :loading="buttonLoading"
-                         @click="$refs.createRelationshipDialog.show()"/>
-              <el-button type="danger" icon="el-icon-delete" @click="clickDeleteButton" :loading="buttonLoading"/>
-            </el-button-group>
-          </div>
+      <div class="align-center-flex">
+        <popover-node-director
+            v-for="(item, i) in references" :key="'popover-ref' + i"
+            @relationship-deleted="updateRelationships"
+            @edit-relationship="editRelationship"
+            :node="item.node" :relationship="item.relationship"/>
+        <fa-icon v-if="references.length > 0" name="sign-in-alt" :scale="2"/>
+        <h1 v-if="node.properties.name" style="display: inline">({{node.properties.name}})</h1>
+        <h1 v-if="!node.properties.name" style="display: inline">(无名)</h1>
+        <fa-icon v-if="applications.length > 0" name="sign-out-alt" :scale="2"/>
+        <popover-node-director
+            v-for="(item, i) in applications"
+            @relationship-deleted="relationshipDeleted(applications, i)"
+            @edit-relationship="editRelationship"
+            :key="'popover-app' + i" :node="item.node"
+            :relationship="item.relationship"/>
+        <div style="margin-left: auto;">
+          <i class="el-icon-s-help" style="font-size: 25px;">{{node.id}}</i>
+          <br/>
+          <i class="el-icon-user-solid" style="font-size: 25px;">{{node.properties.author}}</i>
         </div>
-        <div v-if="node.labels">
-          <i class="el-icon-collection-tag" style="margin-right: 10px"/>
-          <el-tag :key="node.properties.name + '-label-' + tag"
-                  v-for="(tag, i) in node.labels"
-                  :type="colors[i % colors.length]"
-                  size="medium"
-                  style="font-size: 20px">
-            {{globalData.nodeLabelNameMap(tag)}}
-          </el-tag>
-          <el-tag v-if="node.labels.length === 0" :type="colors[0]"
-                  size="medium" style="font-size: 20px">未定义
-          </el-tag>
-        </div>
-        <p style="margin-top: 10px" v-if="node.properties.summary">
-          摘要:{{node.properties.summary}}
-        </p>
       </div>
       <el-divider/>
-      <properties-box :properties="displayProperties"/>
-      <el-divider v-if="displayProperties.length > 0"/>
+      <div class="align-center-flex">
+        <el-col :span="16" class="overview">
+          <tag-list :node="node" class="overview-item"/>
+          <p v-if="node.properties.summary" class="overview-item">
+            <i class="header-icon el-icon-s-order"/>
+            {{node.properties.summary}}
+          </p>
+          <el-collapse class="overview-item">
+            <el-collapse-item>
+              <template slot="title">
+                <i class="el-icon-s-unfold" style="font-size: 20px;"/>
+              </template>
+              <properties-table :properties="displayProperties"/>
+            </el-collapse-item>
+          </el-collapse>
+        </el-col>
+        <el-col :span="8" style="align-self: start;">
+          <div style="float:right;">
+            <el-container class="overview-item">
+              <el-button-group>
+                <el-button type="primary" icon="el-icon-refresh-right" :loading="buttonLoading"
+                           @click="updateAll"/>
+                <el-button type="primary" icon="el-icon-edit" :loading="buttonLoading"
+                           @click="$refs.editNodeDialog.show()"/>
+                <el-button type="primary" icon="el-icon-share" :loading="buttonLoading"
+                           @click="clickExpandButton"/>
+                <el-button type="primary" icon="el-icon-document-add" :loading="buttonLoading"
+                           @click="$refs.addCardDialog.show()"/>
+                <el-button type="primary" icon="el-icon-connection" :loading="buttonLoading"
+                           @click="$refs.createRelationshipDialog.show()"/>
+                <el-button type="danger" icon="el-icon-delete" @click="clickDeleteButton" :loading="buttonLoading"/>
+              </el-button-group>
+            </el-container>
+            <div class="overview-item" style="float: right;">
+              <i class="el-icon-document-add date-with-icon">{{node.properties.created}}</i>
+              <i class="el-icon-edit-outline date-with-icon">{{node.properties.updated}}</i>
+            </div>
+          </div>
+
+        </el-col>
+      </div>
       <relationship-block
-              v-for="item in relationships"
-              :key="'relationship-block-' + item.type"
-              @edit-relationship="editRelationship"
-              @relationship-deleted="updateRelationships"
-              :as-start-node="item.asStartNode"
-              :as-end-node="item.asEndNode"
-              :node="node"
-              :type="item.type"/>
+          v-for="item in relationships"
+          :key="'relationship-block-' + item.type"
+          @edit-relationship="editRelationship"
+          @relationship-deleted="updateRelationships"
+          :as-start-node="item.asStartNode"
+          :as-end-node="item.asEndNode"
+          :node="node"
+          :type="item.type"/>
       <node-card-list v-if="node" ref="nodeCardList" :node="node"/>
     </div>
     <h2 v-if="!node&& fetchedInfo">没有数据</h2>
+    <edit-relationship-dialog
+        ref="editRelationshipDialog" @edited="updateRelationships"/>
+    <create-relationship-dialog :node="node" ref="createRelationshipDialog"
+                                @created="updateRelationships"/>
+    <add-node-card-dialog ref="addCardDialog" :node="node"/>
+    <edit-node-dialog ref="editNodeDialog" :node="node"
+                      @edited="fetchAndUpdateBaseInfo"/>
   </div>
 </template>
 
 <script>
 import '../../../../static/mathjax/tex-chtml'
+import 'vue-awesome/icons/sign-in-alt'
+import 'vue-awesome/icons/sign-out-alt'
 
 const NodeCardList = () => import('./NodeCardList'),
   PopoverNodeDirector = () => import('./PopoverNodeDirector'),
@@ -91,8 +98,10 @@ const NodeCardList = () => import('./NodeCardList'),
   EditRelationshipDialog = () => import('./EditRelationshipDialog'),
   EditNodeDialog = () => import('./EditNodeDialog'),
   RelationshipBlock = () => import('./RelationshipBlock'),
-  PropertiesBox = () => import('./PropertiesBox'),
-  CreateRelationshipDialog = () => import('./CreateRelationshipDialog')
+  PropertiesTable = () => import('./PropertiesTable'),
+  CreateRelationshipDialog = () => import('./CreateRelationshipDialog'),
+  TagList = () => import('./TagList'),
+  FaIcon = () =>  import('vue-awesome/components/Icon')
 
 // 识别latex语法的MathJax的配置
 // noinspection JSUnusedGlobalSymbols
@@ -143,7 +152,10 @@ export default {
      * @returns [{name, value}]
      */
     displayProperties() {
-      let res = []
+      let res = [{
+        name: 'id',
+        value: this.node.id,
+      }]
       for (let name in this.node.properties) {
         if (Object.prototype.hasOwnProperty.call(this.node.properties, name)) {
           if (this.notDisplayProperties.has(name)) {
@@ -166,14 +178,16 @@ export default {
     this.updateRelationships()
   },
   components: {
+    TagList,
     CreateRelationshipDialog,
-    PropertiesBox,
+    PropertiesTable,
     RelationshipBlock,
     EditNodeDialog,
     EditRelationshipDialog,
     AddNodeCardDialog,
     NodeCardList,
     PopoverNodeDirector,
+    FaIcon,
   },
   methods: {
     updateAll() {
@@ -351,9 +365,33 @@ export default {
 }
 </script>
 
-<!--suppress CssUnusedSymbol -->
 <style scoped>
-  .el-tag + .el-tag {
-    margin-left: 10px;
+  .node-view {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .overview {
+    margin: 0 5px 20px 5px;
+    padding: 5px 5px 0 5px;
+  }
+
+  .overview-item + .overview-item {
+    margin-top: 10px;
+  }
+
+  .align-center-flex {
+    display: flex;
+    align-items: center;
+  }
+
+  .date-with-icon {
+    display: block;
+    font-size: 20px;
+  }
+
+  .date-with-icon + .date-with-icon {
+    margin-top: 10px;
   }
 </style>

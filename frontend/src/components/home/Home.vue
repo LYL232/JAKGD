@@ -8,7 +8,7 @@
                    class="header-items" type="primary" icon="el-icon-user"
                    @click="clickUserButton" circle/>
         <el-button-group class="header-items" v-if="username">
-          <el-button class="header-items" type="success" icon="el-icon-user"
+          <el-button class="header-items" type="primary" icon="el-icon-setting"
                      @click="clickToMeButton" round/>
           <el-button type="primary" icon="el-icon-circle-plus"
                      @click="clickCreateNodeButton" round/>

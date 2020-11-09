@@ -7,7 +7,7 @@
         <el-button v-if="!username || username === ''"
                    class="header-items" type="primary" icon="el-icon-user" circle/>
         <el-button-group class="header-items" v-if="username">
-          <el-button class="header-items" type="success" icon="el-icon-s-home"
+          <el-button class="header-items" type="primary" icon="el-icon-s-home"
                      @click="clickToHomeButton" round/>
           <el-button type="primary" @click="clickChangePasswordButton" round>修改密码
           </el-button>

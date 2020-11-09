@@ -28,7 +28,7 @@
         </el-table>
       </el-col>
     </el-container>
-    <el-button slot="reference" round>({{node.id}}):{{node.properties.name}}</el-button>
+    <el-button slot="reference" round>{{getDisplayInfo()}}</el-button>
   </el-popover>
 </template>
 
@@ -86,11 +86,33 @@ export default {
     // {
     //  id, summary
     // }
-    node: Object,
+    node: {
+      type: Object,
+      default() {
+        return null
+      },
+    },
     // {
     //  id, startNode, endNode, type, properties
     // }
-    relationship: Object,
+    relationship: {
+      type: Object,
+      default() {
+        return null
+      },
+    },
+    showId: {
+      type: Boolean,
+      default() {
+        return false
+      },
+    },
+    maxLength: {
+      type: Number,
+      default() {
+        return 5
+      }
+    }
   },
   methods: {
     clickDeleteRelationshipButton() {
@@ -116,6 +138,12 @@ export default {
       }).catch(() => {
         this.show = true
       })
+    },
+    getDisplayInfo() {
+      let res = this.showId ? '(' + this.node.id + '):' : '',
+        name = this.node.properties.name
+      return res + name.length > this.maxLength ?
+        name.substring(0, 3) + '...' : name
     },
     clickEditRelationshipButton() {
       this.$emit('edit-relationship', this.relationship)
