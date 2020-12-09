@@ -452,9 +452,9 @@ class GraphWindow {
       // .velocityDecay(0.8)
       // .force('x', d3.force().strength(0.002))
       // .force('y', d3.force().strength(0.002))
-      .force('collide', d3.forceCollide().radius(function(node) {
+      .force('collide', d3.forceCollide().radius(function() {
         // TODO: 最小碰撞体积与节点属性有关
-        return options.minCollision + 40 + node.id / 25
+        return options.minCollision + 40
       }).iterations(2)).
       force('charge', d3.forceManyBody()).
       force('link', d3.forceLink().id(function(relationship) {
@@ -834,9 +834,9 @@ class GraphWindow {
     // 节点原形图片
     nodeEnter.append('circle').
       attr('class', 'outline').
-      attr('r', function(node) {
+      attr('r', function() {
         // TODO: 与节点属性相关
-        return options.nodeRadius + node.id / 25
+        return options.nodeRadius
       }).
       style('fill', function(node) {
         if (node.labels.length === 0) {
