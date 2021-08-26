@@ -5,7 +5,9 @@
       <el-table-column width="auto" property="value" label="值"/>
     </el-table>
     <span v-if="!properties">没有数据</span>
-    <el-button slot="reference" round type="primary" icon="el-icon-document"/>
+    <template #reference>
+      <el-button round type="primary" icon="el-icon-document"/>
+    </template>
   </el-popover>
 
 </template>

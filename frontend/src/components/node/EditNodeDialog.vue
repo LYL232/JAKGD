@@ -1,16 +1,16 @@
 <template>
-  <el-dialog :title="node?'修改信息' : '创建节点'" :visible.sync="visible" width="750px" center>
+  <el-dialog :title="node?'修改信息' : '创建节点'" v-model="visible" width="750px" center>
     <el-form ref="form" :model="form" label-width="150px" style="width: 95%">
       <el-form-item v-if="!node" label="基础类型">
         <el-select
-                v-model="form.nodeBaseType"
-                @change="nodeBaseTypeSelected"
-                placeholder="请选择基础类型">
+            v-model="form.nodeBaseType"
+            @change="nodeBaseTypeSelected"
+            placeholder="请选择基础类型">
           <el-option
-                  v-for="item in nodeBaseTypeOption"
-                  :key="'node-base-type-option-' + item.value"
-                  :label="item.label"
-                  :value="item.value"/>
+              v-for="item in nodeBaseTypeOption"
+              :key="'node-base-type-option-' + item.value"
+              :label="item.label"
+              :value="item.value"/>
         </el-select>
       </el-form-item>
     </el-form>
@@ -20,32 +20,31 @@
             :disable-transitions="false"
             :type="colors[i % colors.length]"
             @close="handleClose(tag)">
-      {{mapTagName(tag)}}
+      {{ mapTagName(tag) }}
     </el-tag>
     <el-input class="input-new-tag" v-if="newTagInputVisible" v-model="newTagInputValue"
               ref="saveTagInput" size="small" @keyup.enter.native="handleLabelInput"
-              @blur="handleLabelInput"></el-input>
+              @blur="handleLabelInput"/>
     <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新标签</el-button>
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" :loading="loading" @click="clickConfirm">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
-const PropertyEditor = () => import ('./PropertyEditor')
+import PropertyEditor from './PropertyEditor.vue'
 
 export default {
   name: 'EditNodeDialog',
+  emits: ['edited', 'created'],
   components: {PropertyEditor},
   data() {
     return {
       tags: [],
-
       newTagInputValue: '',
       newTagInputVisible: false,
-
       colors: ['success', 'primary', 'info', 'danger', 'warning'],
       visible: false,
       form: {
@@ -78,7 +77,6 @@ export default {
     mapTagName(tag) {
       return this.globalData.nodeLabelNameMap(tag)
     },
-
     handleLabelInput() {
       // 新标签输入框确认
       let inputValue = this.newTagInputValue
@@ -114,7 +112,7 @@ export default {
 
     showInput() {
       this.newTagInputVisible = true
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
@@ -126,12 +124,12 @@ export default {
      */
     addNewPropertyInput(name, value) {
       let deletable = true,
-        nodeBaseTypeRequireProperties = this.globalData.nodeBaseTypeRequireProperties
+          nodeBaseTypeRequireProperties = this.globalData.nodeBaseTypeRequireProperties
       if (this.node) {
         for (let label of this.node.labels) {
           if (label.startsWith('__')
-            && nodeBaseTypeRequireProperties[label]
-            && nodeBaseTypeRequireProperties[label].has(name)) {
+              && nodeBaseTypeRequireProperties[label]
+              && nodeBaseTypeRequireProperties[label].has(name)) {
             deletable = false
             break
           }
@@ -141,7 +139,11 @@ export default {
           deletable = !(nodeBaseTypeRequireProperties[this.form.nodeBaseType].has(name))
         }
       }
-      this.$refs.propertyEditor.addNewPropertyInput(name, value, deletable, false)
+
+      // 在这里有可能没有渲染好，this.propertyEditor为undefined需要等待其渲染好后调用子组件方法
+      this.$nextTick(() => {
+        this.$refs.propertyEditor.addNewPropertyInput(name, value, deletable, false)
+      })
     },
 
     show() {
@@ -159,7 +161,11 @@ export default {
               break
             }
           }
-          this.$refs.propertyEditor.clearInput()
+
+          this.$nextTick(() => {
+            this.$refs.propertyEditor.clearInput()
+          })
+
           for (let name in this.node.properties) {
             if (Object.prototype.hasOwnProperty.call(this.node.properties, name)) {
               this.addNewPropertyInput(name, this.node.properties[name])
@@ -303,23 +309,23 @@ export default {
 </script>
 
 <style scoped>
-  /*noinspection CssUnusedSymbol*/
-  .el-tag + .el-tag {
-    margin-left: 10px;
-    margin-bottom: 10px;
-  }
+/*noinspection CssUnusedSymbol*/
+.el-tag + .el-tag {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
 
-  .button-new-tag {
-    margin-left: 10px;
-    height: 32px;
-    line-height: 30px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
+.button-new-tag {
+  margin-left: 10px;
+  height: 32px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
-  .input-new-tag {
-    width: 90px;
-    margin-left: 10px;
-    vertical-align: bottom;
-  }
+.input-new-tag {
+  width: 90px;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
 </style>

@@ -4,7 +4,7 @@ COPY ./frontend /jakgd
 # 前端静态资源相对路径引用要求 jakgd的父目录有static目录
 COPY ./static /static
 WORKDIR /jakgd
-RUN npm install && npm run build
+RUN yarn && yarn build
 
 FROM nginx:stable-alpine
 # 复制构建阶段的dist文件

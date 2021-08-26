@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="title" :visible.sync="visible" width="750px" center>
+  <el-dialog :title="title" v-model="visible" width="750px" center>
     <el-form v-if="node" ref="form" :model="form"
              label-width="150px" style="width: 95%">
       <el-form-item label="id">
@@ -7,28 +7,28 @@
       </el-form-item>
       <el-form-item label="关系类型">
         <el-autocomplete
-                v-model="form.relType"
-                style="width: 100%"
-                :fetch-suggestions="fetchSuggestions"
-                placeholder="允许中英文数字组合, 不允许数字开头"
-                :maxlength="20" show-word-limit
+            v-model="form.relType"
+            style="width: 100%"
+            :fetch-suggestions="fetchSuggestions"
+            placeholder="允许中英文数字组合, 不允许数字开头"
+            :maxlength="20" show-word-limit
         ></el-autocomplete>
       </el-form-item>
     </el-form>
     <property-editor ref="propertyEditor"/>
-
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
-const PropertyEditor = () => import('./PropertyEditor')
+import PropertyEditor from './PropertyEditor.vue'
 
 export default {
   name: 'CreateRelationshipDialog',
+  emits: ['created'],
   components: {PropertyEditor},
   data() {
     return {
@@ -67,8 +67,8 @@ export default {
      * @returns {{}|null}
      */
     getRequestData() {
-      let res = {}
-      for (let property of this.$refs.propertyEditor.getFormProperties()) {
+      let res = {}, properties = this.$refs.propertyEditor.parentGetFormProperties()
+      for (let property of properties) {
         if (!property.value || (property.value = property.value.trim()) === '') {
           this.$notify.info({
             title: '输入错误',
@@ -158,7 +158,7 @@ export default {
      */
     createDefaultRelationship(relType, targetId, requestData) {
       this.axios.post('/api/relationship/' + this.node.id + '/' + relType + '/' + targetId,
-        requestData).then(() => {
+          requestData).then(() => {
         this.createSuccess()
       }).catch(err => {
         this.createFailed(err)
@@ -171,7 +171,7 @@ export default {
      */
     createReferRelationship(targetId, requestData) {
       this.axios.post('/api/reference/' + this.node.id + '/' + targetId,
-        requestData).then(() => {
+          requestData).then(() => {
         this.createSuccess()
       }).catch(err => {
         this.createFailed(err)

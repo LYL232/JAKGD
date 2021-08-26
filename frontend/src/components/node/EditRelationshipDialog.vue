@@ -1,18 +1,19 @@
 <template>
-  <el-dialog :title="title" :visible.sync="visible" width="750px" center>
+  <el-dialog :title="title" v-model="visible" width="750px" center>
     <property-editor ref="propertyEditor"/>
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
-const PropertyEditor = () => import('./PropertyEditor')
+import PropertyEditor from './PropertyEditor.vue'
 
 export default {
   name: 'EditRelationshipDialog',
+  emits: ['updated', 'edited'],
   components: {PropertyEditor},
   data() {
     return {
@@ -29,8 +30,8 @@ export default {
     title() {
       if (this.relationship) {
         return '编辑关系: (' + this.relationship.startNode + ')-[' +
-          this.globalData.relationshipTypeNameMap(this.relationship.type) +
-          ']->(' + this.relationship.endNode + ') 的属性'
+            this.globalData.relationshipTypeNameMap(this.relationship.type) +
+            ']->(' + this.relationship.endNode + ') 的属性'
       } else {
         return '关系信息缺失'
       }
@@ -72,12 +73,12 @@ export default {
      */
     addNewPropertyInput(name, value) {
       let deletable = true,
-        relationshipBaseTypeRequireProperties =
-          this.globalData.relationshipBaseTypeRequireProperties
+          relationshipBaseTypeRequireProperties =
+              this.globalData.relationshipBaseTypeRequireProperties
       let relType = this.relationship.type
       if (relType.startsWith('__')
-        && relationshipBaseTypeRequireProperties[relType]
-        && relationshipBaseTypeRequireProperties[relType].has(name)) {
+          && relationshipBaseTypeRequireProperties[relType]
+          && relationshipBaseTypeRequireProperties[relType].has(name)) {
         deletable = false
       }
       this.$refs.propertyEditor.addNewPropertyInput(name, value, deletable, false)

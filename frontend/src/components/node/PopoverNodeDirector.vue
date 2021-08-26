@@ -1,11 +1,11 @@
 <template>
-  <el-popover placement="left" trigger="click" v-model="show">
-    <el-container direction="horizontal">
+  <el-popover placement="left" trigger="click" v-model:visible="show">
+    <div style="width: 400px">
       <el-col style="align-items: center">
         <el-table v-if="node" :data="nodeData">
           <el-table-column width="150" property="name" label="节点"/>
           <el-table-column width="250" property="value">
-            <template slot="header">
+            <template #header>
               <el-button @click="clickNodeButton" round type="primary" :loading="loading"
                          style="float:right;" icon="el-icon-view"/>
             </template>
@@ -16,7 +16,7 @@
         <el-table v-if="relationship" :data="relationshipData">
           <el-table-column width="150" property="name" label="关系"/>
           <el-table-column width="250" property="value">
-            <template slot="header">
+            <template #header>
               <el-button-group style="float:right;">
                 <el-button type="primary" round icon="el-icon-edit" :loading="loading"
                            @click="clickEditRelationshipButton"/>
@@ -27,14 +27,17 @@
           </el-table-column>
         </el-table>
       </el-col>
-    </el-container>
-    <el-button slot="reference" round>{{getDisplayInfo()}}</el-button>
+    </div>
+    <template #reference>
+      <el-button round>{{ getDisplayInfo() }}</el-button>
+    </template>
   </el-popover>
 </template>
 
 <script>
 export default {
   name: 'PopoverButton',
+  emits: ['relationship-deleted', 'edit-relationship', 'newTab'],
   data() {
     return {
       loading: false,
@@ -141,9 +144,9 @@ export default {
     },
     getDisplayInfo() {
       let res = this.showId ? '(' + this.node.id + '):' : '',
-        name = this.node.properties.name
+          name = this.node.properties.name
       return res + name.length > this.maxLength ?
-        name.substring(0, 3) + '...' : name
+          name.substring(0, 3) + '...' : name
     },
     clickEditRelationshipButton() {
       this.$emit('edit-relationship', this.relationship)

@@ -1,38 +1,42 @@
 <template>
   <el-card class="card" :style="hasData() ? 'height:auto' : ''">
-    <div slot="header" class="clear-fix">
-      <el-row>
+    <template #header>
+      <div class="clear-fix" style="min-height: 40px;">
         <h3 v-if="cardTitle && cardTitle !== ''"
             style="text-align: center; display: inline">
-          {{cardTitle}}</h3>
-        <el-button style="float:right" type="warning"
-                   icon="el-icon-error" circle size="medium"
-                   @click="clickCloseButton"/>
-      </el-row>
-    </div>
+          {{ cardTitle }}</h3>
+        <el-button style="float:right" type="primary" size="medium" round
+                   @click="clickCloseButton">
+          关闭
+        </el-button>
+      </div>
+    </template>
     <el-row>
       <el-col :span="18">
         <div :id="'graph-window-' + cardId" :style="hasData() ? 'height:' + windowHeight * 0.7 + 'px;' : ''"/>
       </el-col>
       <el-col :span="6">
-        <el-row style="float: right; margin-left: 10px;">
-          <el-button type="primary" icon="el-icon-error"
-                     @click="clearNodeSelected" size="mini" circle
-                     v-if="nodeSelected"/>
+        <div style="margin-left: 10px;">
           <h3 v-if="nodeSelected" style="display: inline">
-            {{util.getNodeTitle(nodeSelected)}}
+            {{ util.getNodeTitle(nodeSelected) }}
           </h3>
           <h3 v-if="!nodeSelected && hasData()">()</h3>
-        </el-row>
+          <el-button
+              type="primary"
+              @click="clearNodeSelected" size="mini" round
+              style="float: right"
+              v-if="nodeSelected">
+            取消选择
+          </el-button>
+        </div>
         <el-button-group v-if="nodeSelected" style="margin: 10px; float: right;">
           <el-button type="primary" icon="el-icon-share"
-                     @click="clickExpandButton" :loading="expandButtonLoading"></el-button>
-          <el-button type="primary" icon="el-icon-document" @click="clickDocumentButton"></el-button>
-          <el-button type="primary" icon="el-icon-circle-close"
-                     @click="clickRemoveButton"></el-button>
-          <el-button type="danger" icon="el-icon-delete"
-                     @click="clickDeleteButton" :loading="deleteButtonLoading"></el-button>
+                     @click="clickExpandButton" :loading="expandButtonLoading"/>
+          <el-button type="primary" icon="el-icon-document" @click="clickDocumentButton"/>
+          <el-button type="primary" icon="el-icon-circle-close" @click="clickRemoveButton"/>
+          <el-button type="danger" icon="el-icon-delete" @click="clickDeleteButton" :loading="deleteButtonLoading"/>
         </el-button-group>
+
         <div :id="'graph-window-' + cardId + 'info'" style="display: inline"/>
       </el-col>
     </el-row>
@@ -130,24 +134,24 @@ export default {
   name: 'GraphCard',
   mounted() {
     if (this.graphData && this.graphData.nodes
-      && this.graphData.nodes.length > 0) {
+        && this.graphData.nodes.length > 0) {
       let that = this
       this.graphWindow = new GraphWindow('#graph-window-' + this.cardId, {
-        onNodeClick: function(node) {
+        onNodeClick: function (event, node) {
           that.nodeSelected = node
           that.graphWindow.setHighlightNodeSet(new Set().add(node.id))
         },
-        onNodeDoubleClick: function(node) {
+        onNodeDoubleClick: function (event, node) {
           that.addNodeViewTab(node)
         },
         infoPanelSelector: '#graph-window-' + this.cardId + 'info',
       })
       // 初始化时随机选择一个节点高亮并固定在屏幕的指定位置
       this.nodeSelected = this.graphData.nodes[
-        this.util.randomNumInRange(0, this.graphData.nodes.length)]
+          this.util.randomNumInRange(0, this.graphData.nodes.length)]
       // TODO: 将被选择的节点放在图窗口的中心位置
       this.graphWindow.appendGraph(this.graphData,
-        new Map().set(this.nodeSelected.id, {x: 400, y: 300}))
+          new Map().set(this.nodeSelected.id, {x: 400, y: 300}))
       this.graphWindow.stickNode(this.nodeSelected.id)
       this.graphWindow.setHighlightNodeSet(new Set().add(this.nodeSelected.id))
     }
@@ -177,11 +181,11 @@ export default {
     clickExpandButton() {
       this.expandButtonLoading = true
       this.axios.get('/api/node/' + this.nodeSelected.id + '/neighborhood/direct').then(
-        response => {
-          let data = response.data
-          this.expandButtonLoading = false
-          this.expandGraph(data, this.nodeSelected)
-        }).catch(err => {
+          response => {
+            let data = response.data
+            this.expandButtonLoading = false
+            this.expandGraph(data, this.nodeSelected)
+          }).catch(err => {
         this.util.errorHint(err, '获取节点领域错误')
         this.expandButtonLoading = false
       })
@@ -216,7 +220,7 @@ export default {
     clickRemoveButton() {
       this.graphWindow.removeGraph({
         nodeIdSet: new Set().add(
-          this.nodeSelected.id,
+            this.nodeSelected.id,
         ),
       })
       this.clearNodeSelected()
@@ -239,7 +243,7 @@ export default {
           })
           this.graphWindow.removeGraph({
             nodeIdSet: new Set().add(
-              this.nodeSelected.id,
+                this.nodeSelected.id,
             ),
           })
           this.deleteButtonLoading = false
@@ -248,7 +252,7 @@ export default {
           this.util.errorHint(err, '删除节点失败')
           this.deleteButtonLoading = false
         })
-      })
+      }).catch(() => {})
     },
   },
 }
@@ -256,19 +260,19 @@ export default {
 
 <style scoped>
 
-  .card {
-    width: 100%;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 10px;
-    bottom: 10px;
-    padding: 10px;
-  }
+.card {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 10px;
+  bottom: 10px;
+  padding: 10px;
+}
 
-  .clear-fix:before,
-  .clear-fix:after {
-    display: table;
-    content: "";
-  }
+.clear-fix:before,
+.clear-fix:after {
+  display: table;
+  content: "";
+}
 
 </style>

@@ -4,9 +4,10 @@
 import globalData from '../global-data'
 import util from '../util'
 
-const d3 = require('d3'),
-  // 内部属性集(不展示)
-  internalProperties = globalData.internalProperties,
+import * as d3 from 'd3'
+
+// 内部属性集(不展示)
+const internalProperties = globalData.internalProperties,
   // 属性名字映射(内部表示=>外部表示)
   propertyNameMap = globalData.propertyNameMap,
   // 标签名字映射
@@ -16,7 +17,7 @@ const d3 = require('d3'),
 
 // 合并两个对象
 function merge(target, source) {
-  Object.keys(source).forEach(function(property) {
+  Object.keys(source).forEach(function (property) {
     target[property] = source[property]
   })
 }
@@ -180,7 +181,7 @@ class GraphNode {
 
     let that = this
     // 删除不必要属性 属性名映射
-    Object.keys(node.properties).forEach(function(property) {
+    Object.keys(node.properties).forEach(function (property) {
       if (!internalProperties.has(property)) {
         that.properties[propertyNameMap(property)] = node.properties[property]
       }
@@ -195,7 +196,7 @@ class GraphNode {
     let s = ' (<id>: ' + this.id
 
     let that = this
-    Object.keys(this.properties).forEach(function(property) {
+    Object.keys(this.properties).forEach(function (property) {
       s += ', ' + property + ': ' +
         JSON.stringify(that.properties[property])
     })
@@ -231,7 +232,7 @@ class GraphRelationship {
 
     // 删除不必要属性 属性名映射
     let that = this
-    Object.keys(relationship.properties).forEach(function(property) {
+    Object.keys(relationship.properties).forEach(function (property) {
       if (!internalProperties.has(property)) {
         that.properties[
           propertyNameMap(property)] = relationship.properties[property]
@@ -252,8 +253,7 @@ class InfoPanel {
    * @param container dom容器
    */
   constructor(container) {
-    this._panel = container.append('div').
-      attr('class', 'graph-window-info')
+    this._panel = container.append('div').attr('class', 'graph-window-info')
   }
 
   /**
@@ -279,10 +279,8 @@ class InfoPanel {
     // noinspection CheckTagEmptyBody
     let elem = this._panel.append('a')
     // noinspection CheckTagEmptyBody
-    elem.attr('href', '#').
-      attr('class', cls).
-      html('<strong>' + property + '</strong>' +
-        (value ? (': ' + value) : ''))
+    elem.attr('href', '#').attr('class', cls).html('<strong>' + property + '</strong>' +
+      (value ? (': ' + value) : ''))
 
     if (backgroundColor) {
       elem.style('background-color', backgroundColor)
@@ -410,35 +408,27 @@ class GraphWindow {
       this._infoPanel = new InfoPanel(d3.select(options.infoPanelSelector))
     }
 
-    // noinspection JSUnresolvedFunction
-    this._svg = this._container.append('svg').
-      attr('width', '100%').
-      attr('height', '100%').
-      attr('class', 'graph-window-svg').
-      call(d3.zoom().on('zoom', function() {
-        // noinspection JSUnresolvedVariable
-        let scale = d3.event.transform.k,
-          translate = [d3.event.transform.x, d3.event.transform.y]
+    this._svg = this._container.append('svg').attr('width', '100%')
+      .attr('height', '100%').attr('class', 'graph-window-svg').call(
+        d3.zoom().on('zoom', function (event) {
+          let scale = event.transform.k,
+            translate = [event.transform.x, event.transform.y]
 
-        if (that._svgTranslate) {
-          translate[0] += that._svgTranslate[0]
-          translate[1] += that._svgTranslate[1]
-        }
+          if (that._svgTranslate) {
+            translate[0] += that._svgTranslate[0]
+            translate[1] += that._svgTranslate[1]
+          }
 
-        if (that._svgScale) {
-          scale *= that._svgScale
-        }
+          if (that._svgScale) {
+            scale *= that._svgScale
+          }
 
-        // noinspection JSUnresolvedFunction
-        that._svg.attr('transform',
-          'translate(' + translate[0] + ', ' + translate[1] + ') ' +
-          'scale(' + scale + ')',
-        )
-      })).
-      on('dblclick.zoom', null).
-      append('g').
-      attr('width', '100%').
-      attr('height', '100%')
+          // noinspection JSUnresolvedFunction
+          that._svg.attr('transform',
+            'translate(' + translate[0] + ', ' + translate[1] + ') ' +
+            'scale(' + scale + ')',
+          )
+        })).on('dblclick.zoom', null).append('g').attr('width', '100%').attr('height', '100%')
 
     // noinspection JSUnresolvedFunction
     this._svgRelationships =
@@ -452,18 +442,14 @@ class GraphWindow {
       // .velocityDecay(0.8)
       // .force('x', d3.force().strength(0.002))
       // .force('y', d3.force().strength(0.002))
-      .force('collide', d3.forceCollide().radius(function() {
+      .force('collide', d3.forceCollide().radius(function () {
         // TODO: 最小碰撞体积与节点属性有关
         return options.minCollision + 40
-      }).iterations(2)).
-      force('charge', d3.forceManyBody()).
-      force('link', d3.forceLink().id(function(relationship) {
+      }).iterations(2)).force('charge', d3.forceManyBody()).force('link', d3.forceLink().id(function (relationship) {
         return relationship.id
-      })).
-      force('center', d3.forceCenter(
+      })).force('center', d3.forceCenter(
         this._svg.node().parentElement.parentElement.clientWidth / 2,
-        this._svg.node().parentElement.parentElement.clientHeight / 2)).
-      on('tick', function() {
+        this._svg.node().parentElement.parentElement.clientHeight / 2)).on('tick', function () {
         that._tick()
       })
   }
@@ -477,6 +463,11 @@ class GraphWindow {
   appendGraph({nodes, relationships}, nodePoints = null) {
     this._appendLogicalGraph({nodes, relationships, nodePoints})
     this._displayGraph()
+    let simulation = this._simulation
+    simulation.alphaTarget(0.3).restart()
+    setTimeout(() => {
+      simulation.alphaTarget(0)
+    }, 200)
   }
 
   /**
@@ -533,7 +524,7 @@ class GraphWindow {
   _updateHighlightNode() {
     let highlightNodeIdSet = this._highlightNodeIdSet
     // 选取所有节点图形更新其class
-    this._svgNodes.selectAll('.node').attr('class', function(node) {
+    this._svgNodes.selectAll('.node').attr('class', function (node) {
       // noinspection JSUnresolvedFunction
       let oldClasses = d3.select(this).attr('class')
       if (highlightNodeIdSet.has(node.id)) {
@@ -682,43 +673,30 @@ class GraphWindow {
   _setRelationshipDoms(relationships) {
     // noinspection JSUnresolvedFunction
     let options = this._options, that = this,
-      svgRelationships = this._svgRelationships.
-        selectAll('.relationship').data(relationships, function(d) {
-          return d.id
-        }),
-      relationshipEnter = svgRelationships.enter().append('g').
-        attr('class', 'relationship').
-        on('dblclick', function(d) {
-          if (typeof options.onRelationshipDoubleClick === 'function') {
-            options.onRelationshipDoubleClick(d)
-          }
-        }).
-        on('mouseenter', function(relationship) {
-          if (that._infoPanel) {
-            that._setInfoPanelFromRelationship(relationship)
-          }
-        }).on('mouseleave', function(/*relationship*/) {
-          if (that._infoPanel) {
-            that._infoPanel.clear()
-          }
-        }),
+      svgRelationships = this._svgRelationships.selectAll('.relationship').data(relationships, function (d) {
+        return d.id
+      }),
+      relationshipEnter = svgRelationships.enter().append('g').attr('class', 'relationship').on('dblclick', function (d) {
+        if (typeof options.onRelationshipDoubleClick === 'function') {
+          options.onRelationshipDoubleClick(d)
+        }
+      }).on('mouseenter', function (event, relationship) {
+        if (that._infoPanel) {
+          that._setInfoPanelFromRelationship(relationship)
+        }
+      }).on('mouseleave', function (/*relationship*/) {
+        if (that._infoPanel) {
+          that._infoPanel.clear()
+        }
+      }),
       // 关系类型文字
-      text = relationshipEnter.append('text').
-        attr('class', 'text').
-        attr('fill', '#000000').
-        attr('font-size', '8px').
-        attr('pointer-events', 'none').
-        attr('text-anchor', 'middle').
-        text(function(relationship) {
-          return relationship.type
-        }),
+      text = relationshipEnter.append('text').attr('class', 'text').attr('fill', '#000000').attr('font-size', '8px').attr('pointer-events', 'none').attr('text-anchor', 'middle').text(function (relationship) {
+        return relationship.type
+      }),
       // 鼠标移动到边上后出现的蓝边, 增大关系被选中的范围
       overlay = relationshipEnter.append('path').attr('class', 'overlay')
     // 表示关系的直线
-    relationshipEnter.append('path').
-      attr('class', 'outline').
-      attr('fill', '#a5abb6').
-      attr('stroke', 'none')
+    relationshipEnter.append('path').attr('class', 'outline').attr('fill', '#a5abb6').attr('stroke', 'none')
 
     svgRelationships.exit().remove()
     this._relationship = relationshipEnter.merge(svgRelationships)
@@ -739,126 +717,95 @@ class GraphWindow {
     // noinspection JSUnresolvedFunction
     let options = this._options, that = this,
       svgNodes = this._svgNodes.selectAll('.node').data(nodes,
-        function(node) {
+        function (node) {
           return node.id
         }), // noinspection JSUnresolvedFunction
-      nodeEnter = svgNodes.enter().append('g').
-        attr('class', function(node) {
-          let classes = 'node'
-          if (that._highlightNodeIdSet.has(node.id)) {
-            // 为高亮节点添加样式
-            classes += ' node-highlighted'
-          }
-          return classes
-        }).
-        on('click', function(node) {
-          node.fx = node.fy = null
+      nodeEnter = svgNodes.enter().append('g').attr('class', function (node) {
+        let classes = 'node'
+        if (that._highlightNodeIdSet.has(node.id)) {
+          // 为高亮节点添加样式
+          classes += ' node-highlighted'
+        }
+        return classes
+      }).on('click', function (event, node) {
+        node.fx = node.fy = null
 
-          if (typeof options.onNodeClick === 'function') {
-            options.onNodeClick(node)
+        if (typeof options.onNodeClick === 'function') {
+          options.onNodeClick(event, node)
+        }
+      }).on('dblclick', function (event, node) {
+        node.fx = node.x
+        node.fy = node.y
+        if (typeof options.onNodeDoubleClick === 'function') {
+          options.onNodeDoubleClick(event, node)
+        }
+      }).on('mouseenter', function (event, node) {
+        if (that._infoPanel) {
+          that._setInfoPanelFromNode(node)
+        }
+        if (typeof options.onNodeMouseEnter === 'function') {
+          options.onNodeMouseEnter(node)
+        }
+      }).on('mouseleave', function (node) {
+        if (that._infoPanel) {
+          that._infoPanel.clear()
+        }
+        if (typeof options.onNodeMouseLeave === 'function') {
+          options.onNodeMouseLeave(node)
+        }
+      }).call(d3.drag().on('start', function (event, node) {
+          if (!event.active) {
+            that._simulation.alphaTarget(0.3).restart()
           }
-        }).
-        on('dblclick', function(node) {
+
           node.fx = node.x
           node.fy = node.y
-          if (typeof options.onNodeDoubleClick === 'function') {
-            options.onNodeDoubleClick(node)
-          }
-        }).
-        on('mouseenter', function(node) {
-          if (that._infoPanel) {
-            that._setInfoPanelFromNode(node)
-          }
-          if (typeof options.onNodeMouseEnter === 'function') {
-            options.onNodeMouseEnter(node)
-          }
-        }).
-        on('mouseleave', function(node) {
-          if (that._infoPanel) {
-            that._infoPanel.clear()
-          }
-          if (typeof options.onNodeMouseLeave === 'function') {
-            options.onNodeMouseLeave(node)
-          }
-        }).
-        call(d3.drag().
-          on('start', function(node) {
-            // noinspection JSUnresolvedVariable
-            if (!d3.event.active) {
-              // noinspection JSUnresolvedFunction
-              that._simulation.alphaTarget(0.3).restart()
-            }
 
-            node.fx = node.x
-            node.fy = node.y
-
-            if (typeof options.onNodeDragStart === 'function') {
-              options.onNodeDragStart(node)
-            }
-          }).
-          on('drag', function(node) {
-            // noinspection JSUnresolvedVariable
-            node.fx = d3.event.x
-            // noinspection JSUnresolvedVariable
-            node.fy = d3.event.y
-          }).
-          on('end', function(node) {
-            // noinspection JSUnresolvedVariable
-            if (!d3.event.active) {
-              // noinspection JSUnresolvedFunction
-              that._simulation.alphaTarget(0)
-            }
-            if (typeof options.onNodeDragEnd === 'function') {
-              options.onNodeDragEnd(node)
-            }
-          }),
-        )
+          if (typeof options.onNodeDragStart === 'function') {
+            options.onNodeDragStart(node)
+          }
+        }).on('drag', function (event, node) {
+          node.fx = event.x
+          node.fy = event.y
+        }).on('end', function (event, node) {
+          if (!event.active) {
+            that._simulation.alphaTarget(0)
+          }
+          if (typeof options.onNodeDragEnd === 'function') {
+            options.onNodeDragEnd(node)
+          }
+        }),
+      )
     // 节点外圈高亮圆环
-    nodeEnter.append('circle').
-      attr('class', 'ring').
-      attr('r', options.nodeRadius * 1.16).
-      append('title').
-      text(function(node) {
-        return node.toString()
-      })
+    nodeEnter.append('circle').attr('class', 'ring').attr('r', options.nodeRadius * 1.16).append('title').text(function (node) {
+      return node.toString()
+    })
     // 节点名字
-    nodeEnter.append('text').
-      attr('class', 'nodeName').
-      style('fill', 'block').
-      attr('dx', 30).
-      attr('dy', -15).
-      style('font-size', '15px').
-      text(function(d) {
-        return d.properties['名字']
-      })
+    nodeEnter.append('text').attr('class', 'nodeName').style('fill', 'block').attr('dx', 30).attr('dy', -15).style('font-size', '15px').text(function (d) {
+      return d.properties['名字']
+    })
     // 节点原形图片
-    nodeEnter.append('circle').
-      attr('class', 'outline').
-      attr('r', function() {
-        // TODO: 与节点属性相关
-        return options.nodeRadius
-      }).
-      style('fill', function(node) {
-        if (node.labels.length === 0) {
-          return '#ffffff'
-        }
-        let classColors = []
-        for (let label of node.labels) {
-          classColors.push(util.string2RGB(that._class2color(label)))
-        }
-        return util.RGB2String(mixColor(classColors))
-      }).
-      style('stroke', function(node) {
-        let classColors = []
-        for (let label of node.labels) {
-          classColors.push(util.string2RGB(that._class2color(label)))
-        }
-        return borderColor(util.RGB2String(mixColor(classColors)))
-      }).
-      append('title').
-      text(function(node) {
-        return node.toString()
-      })
+    nodeEnter.append('circle').attr('class', 'outline').attr('r', function () {
+      // TODO: 与节点属性相关
+      return options.nodeRadius
+    }).style('fill', function (node) {
+      if (node.labels.length === 0) {
+        return '#ffffff'
+      }
+      let classColors = []
+      for (let label of node.labels) {
+        classColors.push(util.string2RGB(that._class2color(label)))
+      }
+      return util.RGB2String(mixColor(classColors))
+    }).style('stroke', function (node) {
+      let classColors = []
+      for (let label of node.labels) {
+        classColors.push(util.string2RGB(that._class2color(label)))
+      }
+      return borderColor(util.RGB2String(mixColor(classColors)))
+    }).append('title').text(function (node) {
+      return node.toString()
+    })
 
     // TODO: 图标
     svgNodes.exit().remove()
@@ -873,14 +820,14 @@ class GraphWindow {
 
     if (this._node) {
       // noinspection JSUnresolvedFunction
-      this._node.attr('transform', function(node) {
+      this._node.attr('transform', function (node) {
         return 'translate(' + node.x + ', ' + node.y + ')'
       })
     }
 
     if (this._relationship) {
       // noinspection JSUnresolvedFunction
-      this._relationship.attr('transform', function(relationship) {
+      this._relationship.attr('transform', function (relationship) {
         return 'translate(' + relationship.source.x + ', '
           + relationship.source.y +
           ') rotate(' +
@@ -912,7 +859,7 @@ class GraphWindow {
    */
   _tickRelationshipsTexts() {
     // noinspection JSUnresolvedFunction
-    this._relationshipText.attr('transform', function(rel) {
+    this._relationshipText.attr('transform', function (rel) {
       let angle = (getAngle(rel.source, rel.target) + 360) % 360,
         mirror = angle > 90 && angle < 270,
         center = {x: 0, y: 0},
@@ -936,14 +883,14 @@ class GraphWindow {
   _tickRelationshipsOutlines() {
     let options = this._options
     // noinspection JSUnresolvedFunction
-    this._relationship.each(function(/*relationship*/) {
+    this._relationship.each(function (/*relationship*/) {
       // 目前用不上relationship对象
       // noinspection JSUnresolvedFunction
       let relationship = d3.select(this),
         outline = relationship.select('.outline'),
         text = relationship.select('.text')
 
-      outline.attr('d', function(rel) {
+      outline.attr('d', function (rel) {
         let center = {x: 0, y: 0},
           angle = getAngle(rel.source, rel.target),
           textBoundingBox = text.node().getBBox(),
@@ -1023,7 +970,7 @@ class GraphWindow {
 
   _tickRelationshipsOverlays() {
     // noinspection JSUnresolvedFunction
-    this._relationshipOverlay.attr('d', function(d) {
+    this._relationshipOverlay.attr('d', function (d) {
       let center = {x: 0, y: 0},
         angle = getAngle(d.source, d.target),
         n1 = unitaryNormalVector(d.source, d.target, 1),

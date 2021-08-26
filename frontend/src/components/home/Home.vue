@@ -3,13 +3,13 @@
     <el-container class="header">
       <el-container>
         <img alt="home-logo" src="../../assets/home-logo.png" id="home-logo"/>
-        <el-avatar class="header-items" v-if="username">{{username}}</el-avatar>
+        <el-avatar class="header-items" v-if="username">{{ username }}</el-avatar>
         <el-button v-if="!username || username === ''"
                    class="header-items" type="primary" icon="el-icon-user"
                    @click="clickUserButton" circle/>
         <el-button-group class="header-items" v-if="username">
           <el-button class="header-items" type="primary" icon="el-icon-setting"
-                     @click="clickToMeButton" round/>
+                     @click="toMe()" round/>
           <el-button type="primary" icon="el-icon-circle-plus"
                      @click="clickCreateNodeButton" round/>
           <el-button type="warning" @click="clickLogoutButton" round>注销
@@ -19,8 +19,10 @@
       <el-input prefix-icon="el-icon-search" class="search-input header-items" placeholder="id, 标签, 摘要"
                 v-model="searchString"
                 clearable>
-        <el-button @click="clickSearchButton" slot="append"
-                   icon="el-icon-search" :loading="searchButtonLoading"/>
+        <template #append>
+          <el-button @click="clickSearchButton"
+                     icon="el-icon-search" :loading="searchButtonLoading"/>
+        </template>
       </el-input>
 
     </el-container>
@@ -30,7 +32,9 @@
             :name="mainTabName"
             :closable=false
         >
-          <span slot="label"><i class="el-icon-share"></i> 主页</span>
+          <template #label>
+            <span><i class="el-icon-share"></i> 主页</span>
+          </template>
           <card-list/>
         </el-tab-pane>
         <el-tab-pane
@@ -47,7 +51,7 @@
       <el-divider/>
       <el-footer class="footer">
         <p style="font-size: 5px; float: right;">
-          ©Copyright 2020 LYL232 版权所有
+          ©Copyright 2021 LYL232 版权所有
         </p>
       </el-footer>
     </div>
@@ -57,13 +61,16 @@
 </template>
 
 <script>
+import {defineAsyncComponent} from 'vue'
+import {useRouter} from 'vue-router'
 // 首页优先加载图展示组件, 该组件在CardList中
-import CardList from './HomeCardList'
+import CardList from './HomeCardList.vue'
 
-const MarkdownEditor = () => import( '../markdown/MarkdownEditor'),
-  NodeView = () => import('../node/NodeView'),
-  LoginDialog = () => import( './LoginDialog'),
-  EditNodeDialog = () => import( '../node/EditNodeDialog')
+const MarkdownEditor = defineAsyncComponent(() => import( '../markdown/MarkdownEditor.vue')),
+    NodeView = defineAsyncComponent(() => import('../node/NodeView.vue')),
+    LoginDialog = defineAsyncComponent(() => import( './LoginDialog.vue')),
+    EditNodeDialog = defineAsyncComponent(() => import( '../node/EditNodeDialog.vue'))
+
 
 export default {
   name: 'Main',
@@ -80,6 +87,15 @@ export default {
       loading: false,
       searchButtonLoading: false,
       mainTabName: 'main-tab',
+    }
+  },
+  setup() {
+    const router = useRouter(), toMe = (() => {
+      console.log('!!!')
+      router.push('/me')
+    })
+    return {
+      toMe
     }
   },
   created() {
@@ -166,7 +182,7 @@ export default {
      */
     removeTab(targetName) {
       let tabs = this.tabs,
-        currentTabName = this.currentTabName
+          currentTabName = this.currentTabName
       if (currentTabName === targetName) {
         tabs.forEach((tab, index) => {
           if (tab.name === targetName) {
@@ -212,10 +228,10 @@ export default {
       }).then(response => {
         this.searchButtonLoading = false
         let data = response.data, totLength = data.nodes.length,
-          newHomeCard = {
-            cardData: data,
-            cardTitle: this.searchString !== '' ? '搜索结果: ' + this.searchString : '',
-          }
+            newHomeCard = {
+              cardData: data,
+              cardTitle: this.searchString !== '' ? '搜索结果: ' + this.searchString : '',
+            }
         if (totLength > 35 && this.searchString && this.searchString !== '') {
           newHomeCard.cardType = 'graph-data-table'
         } else {
@@ -241,9 +257,6 @@ export default {
     clickUserButton() {
       this.$refs.loginDialog.show()
     },
-    clickToMeButton() {
-      this.$router.push('/me')
-    }
   },
   components: {
     EditNodeDialog,
@@ -254,25 +267,25 @@ export default {
 </script>
 
 <style scoped>
-  .header {
-    box-shadow: lightblue 0 0 0 1px;
-    height: auto;
-    padding: 20px 15%;
-  }
+.header {
+  box-shadow: lightblue 0 0 0 1px;
+  height: auto;
+  padding: 20px 15%;
+}
 
-  .search-input {
-    width: auto;
-    height: 40px;
-  }
+.search-input {
+  width: auto;
+  height: 40px;
+}
 
-  .header-items {
-    margin: auto 5px;
-  }
+.header-items {
+  margin: auto 5px;
+}
 
-  #home-logo {
-    width: 100px;
-    height: 75px;
-    max-width: 100%;
-    max-height: 100%;
-  }
+#home-logo {
+  width: 100px;
+  height: 75px;
+  max-width: 100%;
+  max-height: 100%;
+}
 </style>

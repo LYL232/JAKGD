@@ -1,16 +1,17 @@
 <template>
-  <mavon-editor
-          :value="content"
-          :subfield="false"
-          :defaultOpen="'preview'"
-          :toolbarsFlag="false"
-          :editable="false"
-          :scrollStyle="true"
-          :ishljs="true"
-  />
+  <v-md-preview :text="content" class="md-div"/>
+<!--          :value="content"-->
+<!--          :subfield="false"-->
+<!--          :defaultOpen="'preview'"-->
+<!--          :toolbarsFlag="false"-->
+<!--          :editable="false"-->
+<!--          :scrollStyle="true"-->
+<!--          :ishljs="true"-->
+<!--  />-->
 </template>
 
 <script>
+import './md-common.css'
 
 export default {
   name: 'MarkdownBlock',

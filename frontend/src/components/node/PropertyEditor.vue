@@ -15,11 +15,11 @@
     </el-form-item>
     <el-form-item>
       <el-autocomplete
-              v-model="newPropertyName" style="width: 75%"
-              :fetch-suggestions="fetchSuggestions"
-              placeholder="允许中英文数字组合, 不允许数字开头"
-              :maxlength="20" show-word-limit clearable
-              @select="newPropertyInputSelected"/>
+          v-model="newPropertyName" style="width: 75%"
+          :fetch-suggestions="fetchSuggestions"
+          placeholder="允许中英文数字组合, 不允许数字开头"
+          :maxlength="20" show-word-limit clearable
+          @select="newPropertyInputSelected"/>
       <el-button style="float: right" type="primary" size="small"
                  @click="clickNewPropertyNameButton">+ 新属性
       </el-button>
@@ -80,7 +80,7 @@ export default {
 
     clickNewPropertyNameButton() {
       if (!this.newPropertyName
-        || (this.newPropertyName = this.newPropertyName.trim()) === '') {
+          || (this.newPropertyName = this.newPropertyName.trim()) === '') {
         this.$notify.info({
           title: '输入错误',
           message: '请输入新的属性名',
@@ -111,7 +111,7 @@ export default {
 
       for (let property of this.form.properties) {
         if (name === property.name
-          || name === this.globalData.propertyNameMap(property.name)) {
+            || name === this.globalData.propertyNameMap(property.name)) {
           property.deletable = deletable
           property.value = value
           if (info) {

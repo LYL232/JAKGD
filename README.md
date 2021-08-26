@@ -36,9 +36,12 @@ web
     cd backend
 
     mvn -Dmaven.test.skip -U clean package
+    
+  - docker-compose up --build
 
-- docker-compose up --build
-- 启动: docker-compose up
+- 启动之后停止：docker-compose stop
+
+- 停止之后重新启动：docker-compose start
 
 - https部署
   - 将证书文件分别重命名为'server.crt'和'server.key'放入./nginx/ssl文件夹下

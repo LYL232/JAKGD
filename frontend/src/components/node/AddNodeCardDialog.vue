@@ -1,18 +1,18 @@
 <template>
-  <el-dialog title="选择增加的卡片" :visible.sync="visible" width="30%" center>
+  <el-dialog title="选择增加的卡片" v-model="visible" width="30%" center>
     <el-input class="input" placeholder="卡片名称" v-model="cardName" clearable></el-input>
     <el-select class="input" v-model="value" placeholder="请选择增加的卡片类型">
       <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
       </el-option>
     </el-select>
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 
@@ -97,8 +97,8 @@ export default {
 </script>
 
 <style scoped>
-  .input {
-    margin: 10px;
-    width: 90%
-  }
+.input {
+  margin: 10px;
+  width: 90%
+}
 </style>

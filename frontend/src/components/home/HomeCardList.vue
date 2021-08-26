@@ -2,25 +2,26 @@
   <div class="card-view">
     <div v-for="item in cards" :key="item.id">
       <graph-card
-              v-if="item.cardType === 'graph'"
-              :graph-data="item.cardData"
-              :card-id="item.id"
-              :card-title="item.cardTitle"
-              @card-close="onCardClose"/>
+          v-if="item.cardType === 'graph'"
+          :graph-data="item.cardData"
+          :card-id="item.id"
+          :card-title="item.cardTitle"
+          @card-close="onCardClose"/>
       <graph-data-table-card
-              v-if="item.cardType === 'graph-data-table'"
-              :card-id="item.id" :graph-data="item.cardData"
-              :card-title="item.cardTitle"
-              @card-close="onCardClose"/>
+          v-if="item.cardType === 'graph-data-table'"
+          :card-id="item.id" :graph-data="item.cardData"
+          :card-title="item.cardTitle"
+          @card-close="onCardClose"/>
     </div>
   </div>
 </template>
 
 <script>
+import {defineAsyncComponent} from 'vue'
 // 首页优先加载图展示组件
-import GraphCard from './card/GraphCard'
+import GraphCard from './card/GraphCard.vue'
 
-const GraphDataTableCard = () => import( './card/GraphDataTableCard')
+const GraphDataTableCard = defineAsyncComponent(() => import( './card/GraphDataTableCard.vue'))
 
 export default {
   name: 'CardList',
@@ -71,10 +72,10 @@ export default {
 </script>
 
 <style scoped>
-  .card-view {
-    width: 70%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 40px;
-  }
+.card-view {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+}
 </style>

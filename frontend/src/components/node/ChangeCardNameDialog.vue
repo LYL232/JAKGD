@@ -1,14 +1,14 @@
 <template>
-  <el-dialog title="修改卡片名" :visible.sync="visible" width="35%" center>
+  <el-dialog title="修改卡片名" v-model="visible" width="35%" center>
     <el-form ref="form" :model="form" label-width="80px" style="width: 95%">
       <el-form-item label="卡片名">
         <el-input v-model="form.name" maxlength="20" show-word-limit></el-input>
       </el-form-item>
     </el-form>
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 
@@ -16,6 +16,7 @@
 
 export default {
   name: 'ChangeCardNameDialog',
+  emits: ['updated'],
   data() {
     return {
       visible: false,

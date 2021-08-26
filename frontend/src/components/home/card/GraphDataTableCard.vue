@@ -1,17 +1,18 @@
 <template>
   <el-card class="card">
-    <div slot="header" class="clear-fix">
+    <template #header class="clear-fix">
       <el-row>
         <el-col :span="8" style="align-items: center">
-          <h3 v-if="cardTitle && cardTitle !== ''" style="text-align: center">{{cardTitle}}</h3>
+          <h3 v-if="cardTitle && cardTitle !== ''" style="text-align: center">{{ cardTitle }}</h3>
         </el-col>
         <el-col :span="16" style="float:right">
-          <el-button style="float:right" type="warning"
-                     icon="el-icon-error" circle size="small"
-                     @click="clickCloseButton"></el-button>
+          <el-button style="float:right" type="primary" size="medium" round
+                     @click="clickCloseButton">
+            关闭
+          </el-button>
         </el-col>
       </el-row>
-    </div>
+    </template>
     <h3 v-if="hasNodeData()">节点</h3>
     <div v-if="hasNodeData()" class="table">
       <el-table :data="graphData.nodes" class="table">
@@ -19,15 +20,15 @@
         <el-table-column width="auto" property="properties.name" label="名字"/>
         <el-table-column width="auto" property="properties.summary" label="摘要"/>
         <el-table-column width="auto" label="标签">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag :key="'graph-data-table-' + cardId + '-' + scope.row.id + tag"
                     v-for="tag in scope.row.labels">
-              {{mapTagName(tag)}}
+              {{ mapTagName(tag) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column width="auto" label="属性">
-          <template slot-scope="scope">
+          <template #default="scope">
             <popover-node-director :node="scope.row"/>
           </template>
         </el-table-column>
@@ -39,24 +40,24 @@
       <el-table :data="graphData.relationships">
         <el-table-column width="auto" property="id" label="id"/>
         <el-table-column width="auto" label="起始节点">
-          <template slot-scope="scope">
+          <template #default="scope">
             <popover-node-director :node="nodeMap.get(scope.row.startNode)"/>
           </template>
         </el-table-column>
         <el-table-column width="auto" label="类型">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag>
-              {{globalData.relationshipTypeNameMap(scope.row.type)}}
+              {{ globalData.relationshipTypeNameMap(scope.row.type) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column width="auto" label="终止节点">
-          <template slot-scope="scope">
+          <template #default="scope">
             <popover-node-director :node="nodeMap.get(scope.row.endNode)"/>
           </template>
         </el-table-column>
         <el-table-column width="auto" label="属性">
-          <template slot-scope="scope">
+          <template #default="scope">
             <property-popover-button :properties="scope.row.properties"/>
           </template>
         </el-table-column>
@@ -67,8 +68,10 @@
 </template>
 
 <script>
-const PopoverNodeDirector = () => import('../../node/PopoverNodeDirector'),
-  PropertyPopoverButton = () => import('../../node/PropertyPopoverButton')
+import {defineAsyncComponent} from 'vue'
+
+const PopoverNodeDirector = defineAsyncComponent(() => import('../../node/PopoverNodeDirector.vue')),
+    PropertyPopoverButton = defineAsyncComponent(() => import('../../node/PropertyPopoverButton.vue'))
 
 export default {
   name: 'GraphDataTableCard',
@@ -120,30 +123,30 @@ export default {
 </script>
 
 <style scoped>
-  .card {
-    width: 100%;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 10px;
-    bottom: 10px;
-    padding: 10px;
-  }
+.card {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 10px;
+  bottom: 10px;
+  padding: 10px;
+}
 
-  .clear-fix:before,
-  .clear-fix:after {
-    display: table;
-    content: "";
-  }
+.clear-fix:before,
+.clear-fix:after {
+  display: table;
+  content: "";
+}
 
-  .table {
-    margin-left: auto;
-    margin-right: auto;
-  }
+.table {
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  /*noinspection CssUnusedSymbol*/
-  .el-tag + .el-tag {
-    margin-left: 10px;
-    margin-bottom: 10px;
-  }
+/*noinspection CssUnusedSymbol*/
+.el-tag + .el-tag {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
 
 </style>

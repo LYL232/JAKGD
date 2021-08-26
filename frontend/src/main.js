@@ -1,26 +1,47 @@
-import Vue from 'vue'
+import {createApp} from 'vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import App from './App.vue'
-import ElementUI from 'element-ui'
-import MavonEditor from 'mavon-editor'
+import ElementPlus from 'element-plus'
+// import MavonEditor from 'mavon-editor'
+import bus from './bus'
 
 // 解决chrome浏览器警告, 如果加上, d3中的组件会疯狂报错 TODO: 解决
 // import 'default-passive-events'
-import 'element-ui/lib/theme-chalk/index.css'
-import 'mavon-editor/dist/css/index.css'
+import 'element-plus/dist/index.css'
+
+// import 'mavon-editor/dist/css/index.css'
 import globalData from './global-data'
 import util from './util'
 import router from './router'
 
-// 事件传输总线
-Vue.prototype.bus = new Vue()
-// 全局数据
-Vue.prototype.globalData = globalData
-// 全局实用函数
-Vue.prototype.util = util
+// MARKDOWN EDITOR BEGIN
+import VMdEditor from '@kangc/v-md-editor'
+import VMdPreview from '@kangc/v-md-editor/lib/preview'
+import '@kangc/v-md-editor/lib/style/base-editor.css'
+import '@kangc/v-md-editor/lib/style/preview.css'
+import githubTheme from '@kangc/v-md-editor/lib/theme/github.js'
+import '@kangc/v-md-editor/lib/theme/style/github.css'
+import hljs from 'highlight.js'
+// MARKDOWN EDITOR END
 
-axios.defaults.baseURL = window.location.origin
+const app = createApp(App)
+
+app.use(router)
+
+VMdEditor.use(githubTheme, {Hljs: hljs})
+VMdPreview.use(githubTheme, {Hljs: hljs})
+app.use(VMdEditor)
+app.use(VMdPreview)
+
+// 事件传输总线
+app.config.globalProperties.bus = bus
+// 全局数据
+app.config.globalProperties.globalData = globalData
+// 全局实用函数
+app.config.globalProperties.util = util
+
+axios.defaults.baseURL = 'http://backend:8080'
 // 请求拦截器
 axios.interceptors.request.use(
   config => {
@@ -79,16 +100,9 @@ axios.interceptors.response.use(
   },
 )
 
-Vue.config.productionTip = false
-Vue.use(MavonEditor)
-Vue.use(ElementUI)
-// Vue.use(hl)
-Vue.use(VueAxios, axios)
+app.use(ElementPlus)
+app.use(VueAxios, axios)
 
-util.$notify = Vue.prototype.$notify
+util.$notify = app.config.globalProperties.$notify
 
-// noinspection JSUnusedGlobalSymbols
-new Vue({
-  render: h => h(App),
-  router,
-}).$mount('#app')
+app.mount('#app')

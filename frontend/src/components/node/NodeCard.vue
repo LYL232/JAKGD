@@ -1,6 +1,6 @@
 <template>
   <el-card class="card">
-    <div slot="header" class="clear-fix">
+    <template #header class="clear-fix">
       <h2 v-if="cardData.header" style="display: inline">{{cardData.header}}</h2>
       <el-button-group style="float:right">
         <el-button type="primary" icon="el-icon-document" circle></el-button>
@@ -9,7 +9,7 @@
         <el-button type="primary" icon="el-icon-edit-outline" @click="clickEditButton" circle></el-button>
         <el-button type="danger" icon="el-icon-delete" circle></el-button>
       </el-button-group>
-    </div>
+    </template>
     <div v-html="htmlContent"></div>
   </el-card>
 </template>

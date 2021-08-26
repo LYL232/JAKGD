@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="修改密码" :visible.sync="visible" width="35%" center>
+  <el-dialog title="修改密码" v-model="visible" width="35%" center>
     <el-form ref="form" :model="form" label-width="80px" style="width: 95%">
       <el-form-item label="新密码">
         <el-input type="password" v-model="form.password"></el-input>
@@ -8,10 +8,10 @@
         <el-input type="password" v-model="form.repeat" autosize></el-input>
       </el-form-item>
     </el-form>
-    <span slot="footer" class="dialog-footer">
+    <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
-    </span>
+    </template>
   </el-dialog>
 </template>
 

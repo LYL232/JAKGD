@@ -3,7 +3,7 @@
     <change-card-name-dialog ref="changeCardNameDialog" @updated="cardNameUpdated"/>
     <el-card class="card" v-for="(item, i) in cards"
              :key="'node-' + node.id + '-card-' + item.id">
-      <div slot="header">
+      <template #header>
         <h2 v-if="item.header" style="display: inline">{{item.header}}</h2>
         <el-button icon="el-icon-edit" circle style="margin-left: 10px;"
                    type="primary"
@@ -23,10 +23,12 @@
             <el-table-column width="150" property="name" label="属性"/>
             <el-table-column width="250" property="value" label="值"/>
           </el-table>
-          <el-button style="margin-right: 10px;"
-                     type="primary" slot="reference" icon="el-icon-document" circle/>
+          <template #reference>
+            <el-button style="margin-right: 10px;"
+                       type="primary" icon="el-icon-document" circle/>
+          </template>
         </el-popover>
-      </div>
+      </template>
       <markdown-block v-if="item.cardType === 'markdown'" :md-content="item.content"/>
     </el-card>
 
@@ -34,9 +36,11 @@
 </template>
 
 <script>
-const MarkdownBlock = () => import('../markdown/MarkdownBlock'),
-  qs = () => import('qs'),
-  ChangeCardNameDialog = () => import('./ChangeCardNameDialog')
+import {defineAsyncComponent} from 'vue'
+import {stringify} from 'qs'
+
+const MarkdownBlock = defineAsyncComponent(() => import('../markdown/MarkdownBlock.vue')),
+  ChangeCardNameDialog = defineAsyncComponent(() => import('./ChangeCardNameDialog.vue'))
 
 export default {
   name: 'NodeCardList',
@@ -175,7 +179,7 @@ export default {
 
       this.docButtonLoading = true
       this.axios.post('/api/document/' + id + '/partOf/' + this.node.id + '/switch',
-        qs.stringify({type: upward ? 'upward' : 'downward'}),
+        stringify({type: upward ? 'upward' : 'downward'}),
       ).then(() => {
         this.docButtonLoading = false
         this.switchCard(id, upward)

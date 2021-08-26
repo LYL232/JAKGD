@@ -3,24 +3,24 @@
     <div v-if="node">
       <div class="align-center-flex">
         <popover-node-director
-            v-for="(item, i) in references" :key="'popover-ref' + i"
+            v-for="(item, i) in references" :key="'node-view-' + node.id + 'popover-ref' + i"
             @relationship-deleted="updateRelationships"
             @edit-relationship="editRelationship"
             :node="item.node" :relationship="item.relationship"/>
-        <fa-icon v-if="references.length > 0" name="sign-in-alt" :scale="2"/>
-        <h1 v-if="node.properties.name" style="display: inline">({{node.properties.name}})</h1>
+        <right-icon v-if="references.length > 0" class="ref-app-rel"/>
+        <h1 v-if="node.properties.name" style="display: inline">({{ node.properties.name }})</h1>
         <h1 v-if="!node.properties.name" style="display: inline">(无名)</h1>
-        <fa-icon v-if="applications.length > 0" name="sign-out-alt" :scale="2"/>
+        <right-icon v-if="applications.length > 0" class="ref-app-rel"/>
         <popover-node-director
             v-for="(item, i) in applications"
             @relationship-deleted="relationshipDeleted(applications, i)"
             @edit-relationship="editRelationship"
-            :key="'popover-app' + i" :node="item.node"
+            :key="'node-view-' + node.id + 'popover-app' + i" :node="item.node"
             :relationship="item.relationship"/>
         <div style="margin-left: auto;">
-          <i class="el-icon-s-help" style="font-size: 25px;">{{node.id}}</i>
+          <i class="el-icon-s-help" style="font-size: 25px;">{{ node.id }}</i>
           <br/>
-          <i class="el-icon-user-solid" style="font-size: 25px;">{{node.properties.author}}</i>
+          <i class="el-icon-user-solid" style="font-size: 25px;">{{ node.properties.author }}</i>
         </div>
       </div>
       <el-divider/>
@@ -29,11 +29,11 @@
           <tag-list :node="node" class="overview-item"/>
           <p v-if="node.properties.summary" class="overview-item">
             <i class="header-icon el-icon-s-order"/>
-            {{node.properties.summary}}
+            {{ node.properties.summary }}
           </p>
           <el-collapse class="overview-item">
             <el-collapse-item>
-              <template slot="title">
+              <template #title>
                 <i class="el-icon-s-unfold" style="font-size: 20px;"/>
               </template>
               <properties-table :properties="displayProperties"/>
@@ -58,8 +58,8 @@
               </el-button-group>
             </el-container>
             <div class="overview-item" style="float: right;">
-              <i class="el-icon-document-add date-with-icon">{{node.properties.created}}</i>
-              <i class="el-icon-edit-outline date-with-icon">{{node.properties.updated}}</i>
+              <i class="el-icon-document-add date-with-icon">{{ node.properties.created }}</i>
+              <i class="el-icon-edit-outline date-with-icon">{{ node.properties.updated }}</i>
             </div>
           </div>
 
@@ -88,20 +88,19 @@
 </template>
 
 <script>
-import '../../../../static/mathjax/tex-chtml'
-import 'vue-awesome/icons/sign-in-alt'
-import 'vue-awesome/icons/sign-out-alt'
+import '../../../../static/mathjax/tex-chtml.js'
+import {Right} from '@element-plus/icons'
+import {defineAsyncComponent} from 'vue'
 
-const NodeCardList = () => import('./NodeCardList'),
-  PopoverNodeDirector = () => import('./PopoverNodeDirector'),
-  AddNodeCardDialog = () => import('./AddNodeCardDialog'),
-  EditRelationshipDialog = () => import('./EditRelationshipDialog'),
-  EditNodeDialog = () => import('./EditNodeDialog'),
-  RelationshipBlock = () => import('./RelationshipBlock'),
-  PropertiesTable = () => import('./PropertiesTable'),
-  CreateRelationshipDialog = () => import('./CreateRelationshipDialog'),
-  TagList = () => import('./TagList'),
-  FaIcon = () =>  import('vue-awesome/components/Icon')
+const NodeCardList = defineAsyncComponent(() => import('./NodeCardList.vue')),
+    PopoverNodeDirector = defineAsyncComponent(() => import('./PopoverNodeDirector.vue')),
+    AddNodeCardDialog = defineAsyncComponent(() => import('./AddNodeCardDialog.vue')),
+    EditRelationshipDialog = defineAsyncComponent(() => import('./EditRelationshipDialog.vue')),
+    EditNodeDialog = defineAsyncComponent(() => import('./EditNodeDialog.vue')),
+    RelationshipBlock = defineAsyncComponent(() => import('./RelationshipBlock.vue')),
+    PropertiesTable = defineAsyncComponent(() => import('./PropertiesTable.vue')),
+    CreateRelationshipDialog = defineAsyncComponent(() => import('./CreateRelationshipDialog.vue')),
+    TagList = defineAsyncComponent(() => import('./TagList.vue'))
 
 // 识别latex语法的MathJax的配置
 // noinspection JSUnusedGlobalSymbols
@@ -187,7 +186,7 @@ export default {
     AddNodeCardDialog,
     NodeCardList,
     PopoverNodeDirector,
-    FaIcon,
+    RightIcon: Right,
   },
   methods: {
     updateAll() {
@@ -226,7 +225,7 @@ export default {
         })
 
         let relationshipsByType = new Map(),
-          that = this
+            that = this
 
         this.references = []
         this.applications = []
@@ -266,6 +265,7 @@ export default {
             })
           }
         })
+
         this.relationships = []
         relationshipsByType.forEach((value, key) => {
           that.relationships.push({
@@ -366,32 +366,37 @@ export default {
 </script>
 
 <style scoped>
-  .node-view {
-    width: 70%;
-    margin-left: auto;
-    margin-right: auto;
-  }
+.node-view {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  .overview {
-    margin: 0 5px 20px 5px;
-    padding: 5px 5px 0 5px;
-  }
+.overview {
+  margin: 0 5px 20px 5px;
+  padding: 5px 5px 0 5px;
+}
 
-  .overview-item + .overview-item {
-    margin-top: 10px;
-  }
+.overview-item + .overview-item {
+  margin-top: 10px;
+}
 
-  .align-center-flex {
-    display: flex;
-    align-items: center;
-  }
+.align-center-flex {
+  display: flex;
+  align-items: center;
+}
 
-  .date-with-icon {
-    display: block;
-    font-size: 20px;
-  }
+.date-with-icon {
+  display: block;
+  font-size: 20px;
+}
 
-  .date-with-icon + .date-with-icon {
-    margin-top: 10px;
-  }
+.date-with-icon + .date-with-icon {
+  margin-top: 10px;
+}
+
+.ref-app-rel {
+  width: 2em;
+  height: 2em;
+}
 </style>
