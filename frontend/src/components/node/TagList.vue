@@ -6,7 +6,7 @@
             :type="colors[i % colors.length]"
             size="medium"
             class="item tag">
-      {{globalData.nodeLabelNameMap(tag)}}
+      {{ globalData.nodeLabelNameMap(tag) }}
     </el-tag>
     <el-tag v-if="node.labels.length === 0" :type="colors[0]" size="medium" style="font-size: 20px">
       无标签
@@ -33,12 +33,12 @@ export default {
 
 <style scoped>
 
-  .item + .item {
-    margin-left: 10px;
-  }
+.item + .item {
+  margin-left: 10px;
+}
 
-  .tag {
-    font-size: 20px;
-    font-weight: bold;
-  }
+.tag {
+  font-size: 20px;
+  font-weight: bold;
+}
 </style>

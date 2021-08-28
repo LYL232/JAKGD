@@ -1,4 +1,5 @@
 import mitt from 'mitt'
+
 const bus = {}, emitter = mitt()
 bus.$on = emitter.on
 bus.$off = emitter.off

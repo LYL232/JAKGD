@@ -15,7 +15,7 @@
         ></el-autocomplete>
       </el-form-item>
     </el-form>
-    <property-editor ref="propertyEditor"/>
+    <property-editor v-if="propertiesEditorEnable" ref="propertyEditor"/>
     <template #footer class="dialog-footer">
       <el-button @click="visible = false">取 消</el-button>
       <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
@@ -55,6 +55,9 @@ export default {
       }
       return '错误, 节点信息缺失'
     },
+    propertiesEditorEnable() {
+      return this.form.relType !== '引用'
+    }
   },
   methods: {
 
@@ -67,7 +70,7 @@ export default {
      * @returns {{}|null}
      */
     getRequestData() {
-      let res = {}, properties = this.$refs.propertyEditor.parentGetFormProperties()
+      let res = {}, properties = this.$refs.propertyEditor.getFormProperties()
       for (let property of properties) {
         if (!property.value || (property.value = property.value.trim()) === '') {
           this.$notify.info({

@@ -252,7 +252,8 @@ export default {
           this.util.errorHint(err, '删除节点失败')
           this.deleteButtonLoading = false
         })
-      }).catch(() => {})
+      }).catch(() => {
+      })
     },
   },
 }

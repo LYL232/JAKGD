@@ -1,13 +1,5 @@
 <template>
   <v-md-preview :text="content" class="md-div"/>
-<!--          :value="content"-->
-<!--          :subfield="false"-->
-<!--          :defaultOpen="'preview'"-->
-<!--          :toolbarsFlag="false"-->
-<!--          :editable="false"-->
-<!--          :scrollStyle="true"-->
-<!--          :ishljs="true"-->
-<!--  />-->
 </template>
 
 <script>

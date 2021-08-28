@@ -4,8 +4,8 @@
     <el-card class="card" v-for="(item, i) in cards"
              :key="'node-' + node.id + '-card-' + item.id">
       <template #header>
-        <h2 v-if="item.header" style="display: inline">{{item.header}}</h2>
-        <el-button icon="el-icon-edit" circle style="margin-left: 10px;"
+        <h2 v-if="item.header" style="display: inline">{{ item.header }}</h2>
+        <el-button icon="el-icon-edit" circle style="margin-left: 20px;"
                    type="primary"
                    @click="clickCardNameEditorButton(item.id)"></el-button>
         <el-button-group style="float:right">
@@ -18,13 +18,13 @@
           <el-button type="danger" icon="el-icon-delete" circle :loading="docButtonLoading"
                      @click="clickDeleteButton(item.id)"/>
         </el-button-group>
-        <el-popover style="float: right" placement="left" width="400" trigger="click">
+        <el-popover placement="right" width="400" trigger="click">
           <el-table :data="item.properties">
             <el-table-column width="150" property="name" label="属性"/>
             <el-table-column width="250" property="value" label="值"/>
           </el-table>
           <template #reference>
-            <el-button style="margin-right: 10px;"
+            <el-button style="margin-left: 10px"
                        type="primary" icon="el-icon-document" circle/>
           </template>
         </el-popover>
@@ -40,7 +40,7 @@ import {defineAsyncComponent} from 'vue'
 import {stringify} from 'qs'
 
 const MarkdownBlock = defineAsyncComponent(() => import('../markdown/MarkdownBlock.vue')),
-  ChangeCardNameDialog = defineAsyncComponent(() => import('./ChangeCardNameDialog.vue'))
+    ChangeCardNameDialog = defineAsyncComponent(() => import('./ChangeCardNameDialog.vue'))
 
 export default {
   name: 'NodeCardList',
@@ -179,7 +179,7 @@ export default {
 
       this.docButtonLoading = true
       this.axios.post('/api/document/' + id + '/partOf/' + this.node.id + '/switch',
-        stringify({type: upward ? 'upward' : 'downward'}),
+          stringify({type: upward ? 'upward' : 'downward'}),
       ).then(() => {
         this.docButtonLoading = false
         this.switchCard(id, upward)
@@ -243,16 +243,16 @@ export default {
 </script>
 
 <style scoped>
-  .card-view {
-    margin-bottom: 40px;
-  }
+.card-view {
+  margin-bottom: 40px;
+}
 
-  .card {
-    width: 100%;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 10px;
-    bottom: 10px;
-    padding: 10px;
-  }
+.card {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 10px;
+  bottom: 10px;
+  padding: 10px;
+}
 </style>

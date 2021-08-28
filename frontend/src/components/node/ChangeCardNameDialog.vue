@@ -40,7 +40,7 @@ export default {
     clickConfirm() {
       this.loading = true
       this.axios.put('/api/document/' + this.documentId,
-        {name: this.form.name}).then(() => {
+          {name: this.form.name}).then(() => {
         this.$notify({
           title: '成功',
           message: '修改成功',
