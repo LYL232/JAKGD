@@ -70,17 +70,21 @@ export default {
      * @returns {{}|null}
      */
     getRequestData() {
-      let res = {}, properties = this.$refs.propertyEditor.getFormProperties()
-      for (let property of properties) {
-        if (!property.value || (property.value = property.value.trim()) === '') {
-          this.$notify.info({
-            title: '输入错误',
-            message: '属性值不能为空: ' + property.name,
-          })
-          return null
+      let res = {}
+      if (this.$refs.propertyEditor) {
+        let properties = this.$refs.propertyEditor.getFormProperties()
+        for (let property of properties) {
+          if (!property.value || (property.value = property.value.trim()) === '') {
+            this.$notify.info({
+              title: '输入错误',
+              message: '属性值不能为空: ' + property.name,
+            })
+            return null
+          }
+          res[property.name] = property.value
         }
-        res[property.name] = property.value
       }
+
       return res
     },
 
@@ -193,7 +197,9 @@ export default {
         relType: '',
         targetId: '',
       }
-      this.$refs.propertyEditor.clearInput()
+      if (this.$refs.propertyEditor) {
+        this.$refs.propertyEditor.clearInput()
+      }
       this.$emit('created')
     },
 

@@ -64,9 +64,6 @@ export default {
     }
   },
   methods: {
-    noCards() {
-      return this.cards.length === 0
-    },
     fetchCardsData() {
       this.loading = true
       this.cards = []

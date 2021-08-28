@@ -42,7 +42,7 @@
         </el-col>
         <el-col :span="8" style="align-self: start;">
           <div style="float:right;">
-            <el-container class="overview-item">
+            <div class="overview-item">
               <el-button-group>
                 <el-button type="primary" icon="el-icon-refresh-right" :loading="buttonLoading"
                            @click="updateAll"/>
@@ -56,7 +56,7 @@
                            @click="$refs.createRelationshipDialog.show()"/>
                 <el-button type="danger" icon="el-icon-delete" @click="clickDeleteButton" :loading="buttonLoading"/>
               </el-button-group>
-            </el-container>
+            </div>
             <div class="overview-item" style="float: right;">
               <i class="el-icon-document-add date-with-icon">{{ node.properties.created }}</i>
               <i class="el-icon-edit-outline date-with-icon">{{ node.properties.updated }}</i>
