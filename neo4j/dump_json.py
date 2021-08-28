@@ -5,9 +5,9 @@ import json
 import tqdm
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-n', '--nodes_file', type=str, default='./nodes.json')
+parser.add_argument('-n', '--nodes_file', type=str, default='./data/nodes.json')
 parser.add_argument(
-    '-r', '--relationships_file', type=str, default='./relationships.json')
+    '-r', '--relationships_file', type=str, default='./data/relationships.json')
 parser.add_argument('-b', '--batch_size', type=int, default=10000)
 
 args = parser.parse_args()
