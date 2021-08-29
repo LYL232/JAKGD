@@ -1,27 +1,29 @@
 <template>
-  <el-dialog title="修改密码" v-model="visible" width="35%" center>
-    <el-form ref="form" :model="form" label-width="80px" style="width: 95%">
+  <h3>修改密码</h3>
+  <el-divider/>
+  <div style="height: 600px; width: 600px; margin-top: 10px">
+    <el-form ref="form" :model="form" label-width="80px" label-position="left">
       <el-form-item label="新密码">
-        <el-input type="password" v-model="form.password"></el-input>
+        <el-input type="password" v-model="form.password" show-password/>
       </el-form-item>
       <el-form-item label="确认密码">
-        <el-input type="password" v-model="form.repeat" autosize></el-input>
+        <el-input type="password" v-model="form.repeat" show-password/>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="clickConfirm" :loading="loading">
+          确 定
+        </el-button>
       </el-form-item>
     </el-form>
-    <template #footer class="dialog-footer">
-      <el-button @click="visible = false">取 消</el-button>
-      <el-button type="primary" @click="clickConfirm" :loading="loading">确 定</el-button>
-    </template>
-  </el-dialog>
+  </div>
 </template>
 
 <script>
 
 export default {
-  name: 'ChangePasswordDialog',
+  name: 'ChangePasswordPage',
   data() {
     return {
-      visible: false,
       loading: false,
       form: {
         password: '',
@@ -30,9 +32,6 @@ export default {
     }
   },
   methods: {
-    show() {
-      this.visible = true
-    },
     clickConfirm() {
       if (this.form.password !== this.form.repeat) {
         this.$notify.info({
@@ -50,7 +49,6 @@ export default {
           message: '修改成功',
           type: 'success',
         })
-        this.visible = false
         this.loading = false
 
         // 重新登录

@@ -145,8 +145,10 @@ export default {
     getDisplayInfo() {
       let res = this.showId ? '(' + this.node.id + '):' : '',
           name = this.node.properties.name
-      return res + name.length > this.maxLength ?
-          name.substring(0, 3) + '...' : name
+      if (!name) {
+        name = '未命名'
+      }
+      return res + name.length > this.maxLength ? name.substring(0, 3) + '...' : name
     },
     clickEditRelationshipButton() {
       this.$emit('edit-relationship', this.relationship)

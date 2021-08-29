@@ -1,7 +1,6 @@
 package pers.lyl232.jakgd.repository;
 
 import org.neo4j.ogm.model.Result;
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,60 +21,81 @@ public class SearchSessionRepository extends BaseSessionRepository {
     /**
      * 获取一系列指定id的节点
      *
-     * @param session querying session
      * @param idList  指定的id列表
      * @return 节点数据
      */
-    public List<NodeData> getNodesById(Session session, List<Long> idList) {
+    public List<NodeData> getNodesById(List<Long> idList) {
         if (idList.size() < 1) {
             return new LinkedList<>();
         }
         String query = "match (n) where id(n) in $idList " +
                 "and not '__internal' in labels(n) return id(n) as id, " +
                 "labels(n) as labels, properties(n) as properties";
-        return getResultNodeData(session.query(query,
-                Collections.singletonMap("idList", idList)));
+        return getResultNodeData(getSession().query(query, Collections.singletonMap("idList", idList)));
     }
 
     /**
      * 在节点的属性中搜索关键字
      *
-     * @param session         querying session
      * @param key             关键字
      * @param queryProperties 搜索的属性
+     * @param skip            跳过的个数
      * @param limit           限制返回个数
      * @return 指定属性中含有关键字的节点数据
      */
     public List<NodeData> searchInNodeProperties(
-            Session session, String key, Set<String> queryProperties, int limit) {
+            String key, Set<String> queryProperties, long skip, long limit) {
         if (queryProperties.size() < 1) {
             return new LinkedList<>();
         }
         StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
         List<String> propertiesMatchCode = new LinkedList<>();
         for (String property : queryProperties) {
-            propertiesMatchCode.add(String.format("n.%s =~ '(?i).*%s.*'", property,
-                    key));
+            propertiesMatchCode.add(String.format("n.%s =~ '(?i).*%s.*'", property, key));
+        }
+        query.append(String.join(" or ", propertiesMatchCode)).append(
+                String.format(
+                        ") with distinct n return id(n) as id, labels(n) as labels, " +
+                                "properties(n) as properties order by id(n) skip %d limit %d",
+                        skip, limit));
+        logger.info("query in searchInNodeProperties: " + query.toString());
+
+        return getResultNodeData(getSession().query(query.toString(), Collections.emptyMap()));
+    }
+
+    /**
+     * 在节点的属性中搜索关键字，返回结果的个数
+     *
+     * @param key             关键字
+     * @param queryProperties 搜索的属性
+     * @return 指定属性中含有关键字的节点的个数
+     */
+    public long searchCountInNodeProperties(String key, Set<String> queryProperties) {
+        if (queryProperties.size() < 1) {
+            return 0;
+        }
+        StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
+        List<String> propertiesMatchCode = new LinkedList<>();
+        for (String property : queryProperties) {
+            propertiesMatchCode.add(String.format("n.%s =~ '(?i).*%s.*'", property, key));
         }
         query.append(String.join(" or ", propertiesMatchCode))
-                .append(") with distinct n " +
-                "return id(n) as id, labels(n) as labels, " +
-                "properties(n) as properties limit $limit");
-        logger.info("query in searchInNodeProperties: " + query.toString());
-        return getResultNodeData(session.query(query.toString(),
-                Collections.singletonMap("limit", limit)));
+                .append(") with distinct n return count(n) as c");
+        logger.info("query in searchCountInNodeProperties: " + query.toString());
+
+        return getCountResult(getSession().query(query.toString(), Collections.emptyMap()), "c");
     }
 
     /**
      * 在节点的label中搜索关键字
      *
-     * @param session querying session
-     * @param key     关键字
-     * @param limit   限制返回个数
+     * @param key   关键字
+     * @param skip  跳过节点个数
+     * @param limit 限制返回个数
      * @return 标签中含有关键字的节点数据
      */
-    public List<NodeData> searchInNodeLabel(Session session, String key, int limit) {
-        Set<String> labels = searchAllMatchedLabels(session, key);
+    public List<NodeData> searchInNodeLabel(String key, long skip, long limit) {
+        Set<String> labels = searchAllMatchedLabels(key);
         if (labels.size() < 1) {
             return new LinkedList<>();
         }
@@ -85,41 +105,74 @@ public class SearchSessionRepository extends BaseSessionRepository {
             labelMatchedCode.add(String.format("n:%s", label));
         }
         query.append(String.join(" or ", labelMatchedCode))
-                .append(") with distinct n " +
-                        "return id(n) as id, labels(n) as labels, properties(n) as properties " +
-                        "limit ")
-                .append(limit);
+                .append(String.format(") with distinct n" +
+                        " return id(n) as id, labels(n) as labels, properties(n) as properties" +
+                        " order by id(n)" +
+                        " skip %d limit %d", skip, limit
+                ));
         logger.info("query in searchInNodeLabel: " + query.toString());
-        return getResultNodeData(getSession().query(query.toString(),
-                Collections.emptyMap()));
+        return getResultNodeData(getSession().query(query.toString(), Collections.emptyMap()));
+    }
+
+    /**
+     * 在节点的label中搜索关键字，返回符合要求的节点个数
+     *
+     * @param key 关键字
+     * @return 标签中含有关键字的节点数据
+     */
+    public long searchCountInNodeLabel(String key) {
+        Set<String> labels = searchAllMatchedLabels(key);
+        if (labels.size() < 1) {
+            return 0;
+        }
+        StringBuilder query = new StringBuilder("match (n) where not '__internal' in labels(n) and (");
+        List<String> labelMatchedCode = new LinkedList<>();
+        for (String label : labels) {
+            labelMatchedCode.add(String.format("n:%s", label));
+        }
+        query.append(String.join(" or ", labelMatchedCode))
+                .append(") with distinct n return count(n) as count");
+        logger.info("query in searchCountInNodeLabel: " + query.toString());
+        return getCountResult(getSession().query(query.toString(), Collections.emptyMap()), "count");
     }
 
     /**
      * 在关系类型中搜索关键字
      *
-     * @param session querying session
      * @param key     关键字
      * @param limit   限制返回个数
-     * @return 关系类型中含有关键字的节点数据
+     * @return 关系类型中含有关键字的数据
      */
-    public List<RelationshipData> searchInRelationshipType(
-            Session session, String key, int limit) {
+    public List<RelationshipData> searchInRelationshipType(String key, long skip, long limit) {
         String query = String.format("match ()-[r]->() where not type(r) contains '__' " +
                 "and type(r) =~ '(?i).*%s.*' with distinct r return id(r) as id, " +
                 "id(startNode(r)) as startNode, id(endNode(r)) as endNode, " +
-                "type(r) as type, properties(r) as properties limit %d", key, limit);
+                "type(r) as type, properties(r) as properties order by id(r) skip %d limit %d",
+                key, skip, limit);
         logger.info("query in searchInRelationshipType: " + query);
-        return getResultRelationshipData(session.query(query, Collections.emptyMap()));
+        return getResultRelationshipData(getSession().query(query, Collections.emptyMap()));
+    }
+
+    /**
+     * 在关系类型中搜索关键字, 返回符合的关系个数
+     *
+     * @param key     关键字
+     * @return 关系类型中含有关键字的数据个数
+     */
+    public long searchCountInRelationshipType(String key) {
+        String query = String.format("match ()-[r]->() where not type(r) contains '__' " +
+                "and type(r) =~ '(?i).*%s.*' with distinct r return count(r) as c", key);
+        logger.info("query in searchCountInRelationshipType: " + query);
+        return getCountResult(getSession().query(query, Collections.emptyMap()), "c");
     }
 
     /**
      * 搜索所有包含关键字的label
      *
-     * @param session querying session
      * @param key     关键字
      * @return labels集合
      */
-    public Set<String> searchAllMatchedLabels(Session session, String key) {
+    public Set<String> searchAllMatchedLabels(String key) {
         String query;
         // 如果搜索关键字是某个可以展示的内部标签的前端名称, 则去搜索这个label的节点
         if (nameToInternalLabel.containsKey(key)) {
@@ -134,7 +187,7 @@ public class SearchSessionRepository extends BaseSessionRepository {
         }
         logger.info("query in searchAllMatchedLabels: " + query);
         Set<String> labels = new HashSet<>();
-        Result result = session.query(query, Collections.emptyMap());
+        Result result = getSession().query(query, Collections.emptyMap());
         for (Map<String, Object> record : result) {
             labels.add((String) record.get("label"));
         }
@@ -144,31 +197,51 @@ public class SearchSessionRepository extends BaseSessionRepository {
     /**
      * 在关系的属性中搜索关键字
      *
-     * @param session         querying session
      * @param key             关键字
      * @param queryProperties 搜索的属性
+     * @param skip           跳过的记录个数
      * @param limit           限制返回的个数
      * @return 指定属性中含有关键字的关系数据
      */
     public List<RelationshipData> searchInRelationshipProperties(
-            Session session, String key, Set<String> queryProperties, int limit) {
+            String key, Set<String> queryProperties, long skip, long limit) {
         if (queryProperties.size() < 1) {
             return new LinkedList<>();
         }
         StringBuilder query = new StringBuilder("match ()-[r]->() where ");
         List<String> propertiesMatchCode = new LinkedList<>();
         for (String property : queryProperties) {
-            propertiesMatchCode.add(String.format("r.%s =~ '(?i).*%s.*'", property,
-                    key));
+            propertiesMatchCode.add(String.format("r.%s =~ '(?i).*%s.*'", property, key));
         }
         query.append(String.join(" or ", propertiesMatchCode))
-                .append(" with distinct r " +
-                        "return id(r) as id, type(r) as type, properties(r) as properties, " +
-                        "id(startNode(r)) as startNode, id(endNode(r)) as endNode limit ")
-                .append(limit);
+                .append(String.format(" with distinct r " +
+                        " return id(r) as id, type(r) as type, properties(r) as properties," +
+                        " id(startNode(r)) as startNode, id(endNode(r)) as endNode order by id(r)" +
+                        " skip %d limit %d", skip, limit));
         logger.info("query in searchInRelationshipProperties: " + query.toString());
-        return getResultRelationshipData(session.query(query.toString(),
-                Collections.emptyMap()));
+        return getResultRelationshipData(getSession().query(query.toString(), Collections.emptyMap()));
+    }
+
+    /**
+     * 在关系的属性中搜索关键字，返回符合要求的关系个数
+     *
+     * @param key             关键字
+     * @param queryProperties 搜索的属性
+     * @return 指定属性中含有关键字的关系数据
+     */
+    public long searchCountInRelationshipProperties(String key, Set<String> queryProperties) {
+        if (queryProperties.size() < 1) {
+            return 0;
+        }
+        StringBuilder query = new StringBuilder("match ()-[r]->() where ");
+        List<String> propertiesMatchCode = new LinkedList<>();
+        for (String property : queryProperties) {
+            propertiesMatchCode.add(String.format("r.%s =~ '(?i).*%s.*'", property, key));
+        }
+        query.append(String.join(" or ", propertiesMatchCode))
+                .append(" with distinct r return count(r) as c");
+        logger.info("query in searchCountInRelationshipProperties: " + query.toString());
+        return getCountResult(getSession().query(query.toString(), Collections.emptyMap()), "c");
     }
 
     /**
@@ -218,6 +291,16 @@ public class SearchSessionRepository extends BaseSessionRepository {
             properties.put((String) entry.getKey(), (String) entry.getValue());
         }
         return properties;
+    }
+
+    private long getCountResult(Result result, String key) {
+        Long res = null;
+        for (Map<String, Object> record : result) {
+            assert res == null : "duplicate record: " + record.get(key);
+            res = (Long) record.get(key);
+        }
+        assert res != null : "no record";
+        return res;
     }
 
     // 如果搜索关键字是某个可以展示的内部标签的前端名称, 则去搜索这个label的节点

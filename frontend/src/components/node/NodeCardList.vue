@@ -1,5 +1,5 @@
 <template>
-  <el-container class="card-view" v-loading="loading" direction="vertical">
+  <el-container style="margin-bottom: 40px;" v-loading="loading" direction="vertical">
     <change-card-name-dialog ref="changeCardNameDialog" @updated="cardNameUpdated"/>
     <el-card class="card" v-for="(item, i) in cards"
              :key="'node-' + node.id + '-card-' + item.id">
@@ -240,10 +240,6 @@ export default {
 </script>
 
 <style scoped>
-.card-view {
-  margin-bottom: 40px;
-}
-
 .card {
   width: 100%;
   margin-right: auto;

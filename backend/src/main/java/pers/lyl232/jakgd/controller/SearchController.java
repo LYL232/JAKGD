@@ -10,7 +10,6 @@ import pers.lyl232.jakgd.service.SearchService;
 import pers.lyl232.jakgd.util.BriefJSONResponse;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 @RequestMapping("/api/search")
 @RestController
@@ -18,53 +17,174 @@ public class SearchController extends BaseController {
 
     final private SearchService service;
 
-    final private Pattern validPattern;
-
-    public SearchController(SearchService service,
-                            Pattern validPattern) {
+    public SearchController(SearchService service) {
         this.service = service;
-        this.validPattern = validPattern;
     }
 
     @GetMapping("")
-    JSONObject getDefault(
-            @RequestParam(required = false, defaultValue = "1000") Integer limit) {
+    JSONObject getDefault(@RequestParam(required = false, defaultValue = "1000") Long limit) {
         return service.getDefault(Math.min(1000, limit));
     }
 
-    @PostMapping("")
-    JSONObject search(
+
+    @PostMapping("/node/property")
+    JSONObject searchInNodeProperty(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
-            String key = (String) body.get("key");
-            if (key == null) {
-                throw new ParameterMissingException("key: String");
-            }
-            Integer limit = (Integer) body.get("limit");
-            if (limit == null) {
-                limit = 1000;
-            }
-            Set<String> properties = new HashSet<>();
-            String queryPropertiesListString = (String) body.get("queryProperties");
-            JSONArray queryPropertiesList;
-            if (queryPropertiesListString == null) {
-                queryPropertiesList = new JSONArray();
-            } else {
-                queryPropertiesList = JSONObject.parseArray(queryPropertiesListString);
-            }
-            for (Object propertyObj : queryPropertiesList) {
-                if (!(propertyObj instanceof String)) {
-                    throw new ExceptionWithBriefJSONResponse(BriefJSONResponse.Code.JSON_ERROR);
-                }
-                properties.add((String) propertyObj);
-            }
-            for (String property : properties) {
-                checkIfStringMatchesPattern(validPattern, property);
-            }
-            return service.getSearchResult(key, properties, limit);
+            SearchParameter param = new SearchParameter(
+                    body, true, true, true, true);
+            return service.getSearchInNodePropertyResult(param.key, param.properties, param.skip, param.limit);
         } catch (ClassCastException exception) {
-            throw new InvalidParameterException(
-                    body.get("queryProperties").toString());
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("/node/property/count")
+    long searchCountInNodeProperty(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, false, false, true);
+            return service.getSearchInNodePropertyCount(param.key, param.properties);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("node/label")
+    JSONObject searchInNodeLabel(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, true, true, false);
+            return service.getSearchInNodeLabelResult(param.key, param.skip, param.limit);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("node/label/count")
+    Long searchCountInNodeLabel(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, false, false, false);
+            return service.getSearchInNodeLabelCount(param.key);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("relationship/property")
+    JSONObject searchInRelationshipProperty(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, true, true, true);
+            return service.getSearchInRelationshipPropertyResult(
+                    param.key, param.properties, param.skip, param.limit);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("relationship/property/count")
+    Long searchCountInRelationshipProperty(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, false, false, true);
+            return service.getSearchInRelationshipPropertyCount(param.key, param.properties);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("relationship/type")
+    JSONObject searchInRelationshipType(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, true, true, false);
+            return service.getSearchInRelationshipTypeResult(param.key, param.skip, param.limit);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+    @PostMapping("relationship/type/count")
+    Long searchCountInRelationshipType(
+            @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
+        try {
+            SearchParameter param = new SearchParameter(
+                    body, true, false, false, false);
+            return service.getSearchInRelationshipTypeCount(param.key);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
+    }
+
+
+    static class SearchParameter {
+        final String key;
+        final Long skip;
+        final Long limit;
+        final Set<String> properties;
+
+        SearchParameter(
+                Map<String, Object> body,
+                boolean requireKey, boolean requireSkip,
+                boolean requireLimit, boolean requireProperties
+        ) throws ExceptionWithBriefJSONResponse {
+            if (requireKey) {
+                key = (String) body.get("key");
+                if (key == null || key.isEmpty()) {
+                    throw new ParameterMissingException("key: String cannot be empty");
+                }
+            } else {
+                key = null;
+            }
+
+            if (requireSkip) {
+                Integer skip = (Integer) body.get("skip");
+                if (skip == null) {
+                    throw new ParameterMissingException("skip: Long cannot be null");
+                }
+                this.skip = skip.longValue();
+            } else {
+                this.skip = 0L;
+            }
+
+            if (requireLimit) {
+                Integer limit = (Integer) body.get("limit");
+                if (limit == null) {
+                    throw new ParameterMissingException("limit: Long cannot be null");
+                }
+                this.limit = limit.longValue();
+            } else {
+                this.limit = 1000L;
+            }
+
+            if (requireProperties) {
+                Set<String> properties = new HashSet<>();
+                String queryPropertiesListString = (String) body.get("queryProperties");
+                JSONArray queryPropertiesList;
+                if (queryPropertiesListString == null) {
+                    queryPropertiesList = new JSONArray();
+                } else {
+                    queryPropertiesList = JSONObject.parseArray(
+                            queryPropertiesListString.replace("\\", ""));
+                }
+                for (Object propertyObj : queryPropertiesList) {
+                    if (!(propertyObj instanceof String)) {
+                        throw new ExceptionWithBriefJSONResponse(BriefJSONResponse.Code.JSON_ERROR);
+                    }
+                    properties.add((String) propertyObj);
+                }
+                this.properties = properties;
+            } else {
+                this.properties = null;
+            }
         }
     }
 

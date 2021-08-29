@@ -26,7 +26,7 @@ public interface NodeRepository extends Neo4jRepository<AbstractNode, Long> {
             "id(startNode(r)) as startNode, " +
             "id(endNode(r)) as endNode limit $limit")
     List<RelationshipData> getNeighborRelationships(
-            @Param("id") Long id, @Param("limit") Integer limit);
+            @Param("id") Long id, @Param("limit") Long limit);
 
     @Query("match (n) where id(n) = $id with n " +
             "match p=(n)-[*0..1]-(m) " +
@@ -37,7 +37,7 @@ public interface NodeRepository extends Neo4jRepository<AbstractNode, Long> {
             "id(startNode(r)) as startNode, " +
             "id(endNode(r)) as endNode limit $limit")
     List<RelationshipData> getDirectNeighborRelationships(
-            @Param("id") Long id, @Param("limit") Integer limit);
+            @Param("id") Long id, @Param("limit") Long limit);
 
     @Query("match (n)-[r]->() where id(n) = $id return " +
             "id(r) as id, type(r) as type, properties(r) as properties, " +
@@ -54,7 +54,7 @@ public interface NodeRepository extends Neo4jRepository<AbstractNode, Long> {
             "labels(n) as labels, " +
             "properties(n) as properties " +
             "limit $limit")
-    List<NodeData> getDefaultSearchNodes(@Param("limit") Integer limit);
+    List<NodeData> getDefaultSearchNodes(@Param("limit") Long limit);
 
     @Query("match(n) where id(n) = $id return count(n) > 0")
     Boolean exists(@Param("id") Long id);
@@ -65,10 +65,10 @@ public interface NodeRepository extends Neo4jRepository<AbstractNode, Long> {
             "id(m) as nodeId, labels(m) as nodeLabels, " +
             "properties(m) as nodeProperties limit $limit")
     List<RelationshipWithOneNodeData> getNodesDirectNeighbor(
-            @Param("idList") List<Long> idList, @Param("limit") Integer limit);
+            @Param("idList") List<Long> idList, @Param("limit") Long limit);
 
     @Query("match (n) where id(n) in $idList return count(n)")
-    Integer existCount(@Param("idList") Long... idList);
+    Long existCount(@Param("idList") Long... idList);
 
     @Query("match (n) where id(n) = $id return id(n) as id, " +
             "labels(n) as labels, properties(n) as properties")

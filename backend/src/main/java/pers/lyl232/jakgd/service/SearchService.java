@@ -1,8 +1,6 @@
 package pers.lyl232.jakgd.service;
 
 import com.alibaba.fastjson.JSONObject;
-import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.transaction.Transaction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.lyl232.jakgd.entity.result.NodeData;
@@ -37,7 +35,7 @@ public class SearchService {
      * 保证nodes中有relationships中涉及到的所有node
      */
     @Transactional(readOnly = true)
-    public JSONObject getDefault(int limit) {
+    public JSONObject getDefault(long limit) {
         List<NodeData> nodes = nodeRepository.getDefaultSearchNodes(limit);
         List<Long> nodeIdList = new LinkedList<>();
         Set<Long> nodeIdSet = new HashSet<>();
@@ -60,70 +58,114 @@ public class SearchService {
     }
 
     /**
-     * 在节点的label, 关系的类型, 和属性中搜索指定关键字
+     * 在节点的属性中搜索包含指定关键字的节点，返回其数据
      *
      * @param key             关键字
-     * @param queryProperties 查询的语句
+     * @param queryProperties 查询的属性
+     * @param skip            跳过的记录个数
      * @param limit           限制返回个数
      * @return {
      * nodes: [{id, labels: [...], properties: {key:value...}}],
-     * relationships: [{id, type, startNode(id),
-     * endNode(id), properties: {key:value}}]
      * }
-     * 保证nodes中有relationships中涉及到的所有node
-     * TODO: 并行化查询？
      */
-    public JSONObject getSearchResult(
-            String key, Set<String> queryProperties, int limit) {
-        if (key.isEmpty()) {
-            return getDefault(limit);
-        }
-        Session session = searchSessionRepository.getSession();
-        Transaction transaction = session.beginTransaction(Transaction.Type.READ_ONLY);
-        List<NodeData> nodes = new LinkedList<>(), nodeData;
-        List<RelationshipData> relationships = new LinkedList<>(), relationshipData;
-        Set<Long> nodeIdSet = new HashSet<>(), relationshipsIdSet = new HashSet<>(),
-                nodesIdToQuery = new HashSet<>();
-        try {
-            // 如果key是纯数字, 则优先查询id
-            int id = Integer.parseInt(key);
-            nodeData = searchSessionRepository.getNodesById(session,
-                    Collections.singletonList((long) id));
-            for (NodeData node : nodeData) {
-                nodeIdSet.add(node.id);
-                nodes.add(node);
-            }
-        } catch (NumberFormatException ignored) {
-        }
-        nodeData = searchSessionRepository.searchInNodeProperties(
-                session, key, queryProperties, limit);
-        if (appendUntilLimit(nodeData, nodeIdSet, nodes, limit) >= limit) {
-            transaction.commit();
-            return graphResultWrapper(nodes, relationships);
-        }
-        nodeData = searchSessionRepository.searchInNodeLabel(session, key, limit);
-        if (appendUntilLimit(nodeData, nodeIdSet, nodes, limit) >= limit) {
-            transaction.commit();
-            return graphResultWrapper(nodes, relationships);
-        }
-        relationshipData = searchSessionRepository.searchInRelationshipProperties(
-                session, key, queryProperties, limit
-        );
-        if (appendUntilLimit(relationshipData, relationshipsIdSet,
-                relationships, nodeIdSet, nodesIdToQuery, limit) >= limit) {
-            nodes.addAll(searchSessionRepository.getNodesById(
-                    session, new LinkedList<>(nodesIdToQuery)));
-            transaction.commit();
-            return graphResultWrapper(nodes, relationships);
-        }
-        relationshipData = searchSessionRepository.searchInRelationshipType(
-                session, key, limit);
-        appendUntilLimit(relationshipData, relationshipsIdSet,
-                relationships, nodeIdSet, nodesIdToQuery, limit);
-        nodes.addAll(searchSessionRepository.getNodesById(
-                session, new LinkedList<>(nodesIdToQuery)));
-        transaction.commit();
-        return graphResultWrapper(nodes, relationships);
+    public JSONObject getSearchInNodePropertyResult(
+            String key, Set<String> queryProperties, long skip, long limit) {
+        return nodesResultWrapper(
+                searchSessionRepository.searchInNodeProperties(
+                        key, queryProperties, skip, limit));
+    }
+
+    /**
+     * 在节点的属性中搜索包含指定关键字的节点，返回个数
+     *
+     * @param key             关键字
+     * @param queryProperties 查询的属性
+     * @return 搜索结果个数
+     */
+    public long getSearchInNodePropertyCount(String key, Set<String> queryProperties) {
+        return searchSessionRepository.searchCountInNodeProperties(key, queryProperties);
+    }
+
+    /**
+     * 在节点的label中搜索包含指定关键字的节点，返回其数据
+     *
+     * @param key   关键字
+     * @param skip  跳过的记录个数
+     * @param limit 限制返回个数
+     * @return {
+     * nodes: [{id, labels: [...], properties: {key:value...}}],
+     * }
+     */
+    public JSONObject getSearchInNodeLabelResult(String key, long skip, long limit) {
+        return nodesResultWrapper(searchSessionRepository.searchInNodeLabel(key, skip, limit));
+    }
+
+    /**
+     * 在节点的label中搜索包含指定关键字的节点，返回其个数
+     *
+     * @param key 关键字
+     * @return 个数
+     */
+    public long getSearchInNodeLabelCount(String key) {
+        return searchSessionRepository.searchCountInNodeLabel(key);
+    }
+
+    /**
+     * 在关系的属性中搜索包含指定关键字的关系，返回其数据，和其关联的所有节点的数据
+     *
+     * @param key             关键字
+     * @param queryProperties 查询的属性
+     * @param skip            跳过的记录个数
+     * @param limit           限制返回个数
+     * @return {
+     * nodes: [{id, labels: [...], properties: {key:value...}}],
+     * relationships: [{id, type, startNode(id), endNode(id), properties: {key:value}}]
+     * }
+     */
+    public JSONObject getSearchInRelationshipPropertyResult(
+            String key, Set<String> queryProperties, long skip, long limit) {
+        List<RelationshipData> relationshipData = searchSessionRepository.searchInRelationshipProperties(
+                key, queryProperties, skip, limit);
+        return graphResultWrapper(getNodeByRelationships(relationshipData), relationshipData);
+    }
+
+    /**
+     * 在关系的属性中搜索包含指定关键字的关系，返回其个数
+     *
+     * @param key             关键字
+     * @param queryProperties 查询的属性
+     * @return {
+     * relationships: [{id, type, startNode(id), endNode(id), properties: {key:value}}]
+     * }
+     */
+    public long getSearchInRelationshipPropertyCount(String key, Set<String> queryProperties) {
+        return searchSessionRepository.searchCountInRelationshipProperties(key, queryProperties);
+    }
+
+    /**
+     * 在关系的type中搜索包含指定关键字的关系，返回其数据，和其关联的所有节点的数据
+     *
+     * @param key   关键字
+     * @param skip  跳过的记录个数
+     * @param limit 限制返回个数
+     * @return {
+     * nodes: [{id, labels: [...], properties: {key:value...}}],
+     * relationships: [{id, type, startNode(id), endNode(id), properties: {key:value}}]
+     * }
+     */
+    public JSONObject getSearchInRelationshipTypeResult(String key, long skip, long limit) {
+        List<RelationshipData> relationshipData = searchSessionRepository.searchInRelationshipType(key, skip, limit);
+        return graphResultWrapper(getNodeByRelationships(relationshipData), relationshipData);
+    }
+
+    /**
+     * 在关系的type中搜索包含指定关键字的关系，返回其个数
+     *
+     * @param key 关键字
+     * @return 符合条件的记录个数
+     */
+    public long getSearchInRelationshipTypeCount(String key) {
+        return searchSessionRepository.searchCountInRelationshipType(key);
     }
 
     private JSONObject graphResultWrapper(
@@ -134,64 +176,18 @@ public class SearchService {
         return res;
     }
 
-    /**
-     * 追加节点数据直至集合达到限制或者新数据追加完毕
-     *
-     * @param newData   新数据
-     * @param nodeIdSet 节点id集合
-     * @param nodes     节点数据集合
-     * @param limit     限制
-     * @return 节点集合的大小
-     */
-    private int appendUntilLimit(
-            List<NodeData> newData, Set<Long> nodeIdSet,
-            List<NodeData> nodes, int limit) {
-        for (NodeData node : newData) {
-            if (!nodeIdSet.contains(node.id)) {
-                nodes.add(node);
-                nodeIdSet.add(node.id);
-            }
-            if (nodeIdSet.size() >= limit) {
-                return nodeIdSet.size();
-            }
-        }
-        return nodeIdSet.size();
+    private JSONObject nodesResultWrapper(List<NodeData> nodeData) {
+        JSONObject res = new JSONObject();
+        res.put("nodes", nodeData);
+        return res;
     }
 
-    /**
-     * 追加关系数据直至集合达到限制或者新数据追加完毕
-     *
-     * @param newData            新数据
-     * @param relationshipsIdSet 等待查询节点id集合
-     * @param relationships      关系数据列表
-     * @param nodeIdSet          已有数据节点id集合
-     * @param nodesIdToQuery     未有数据节点id集合
-     * @param limit              限制
-     * @return nodeIdSet 与 relationshipsIdSet 大小的最大值
-     */
-    private int appendUntilLimit(
-            List<RelationshipData> newData,
-            Set<Long> relationshipsIdSet,
-            List<RelationshipData> relationships,
-            Set<Long> nodeIdSet,
-            Set<Long> nodesIdToQuery, int limit) {
-        for (RelationshipData relationship : newData) {
-            if (!relationshipsIdSet.contains(relationship.id)) {
-                relationships.add(relationship);
-                relationshipsIdSet.add(relationship.id);
-                if (!nodeIdSet.contains(relationship.startNode)) {
-                    nodesIdToQuery.add(relationship.startNode);
-                    nodeIdSet.add(relationship.startNode);
-                }
-                if (!nodeIdSet.contains(relationship.endNode)) {
-                    nodesIdToQuery.add(relationship.endNode);
-                    nodeIdSet.add(relationship.endNode);
-                }
-            }
-            if (nodeIdSet.size() >= limit || relationshipsIdSet.size() >= limit) {
-                return Math.max(nodeIdSet.size(), relationshipsIdSet.size());
-            }
+    private List<NodeData> getNodeByRelationships(List<RelationshipData> relationships) {
+        Set<Long> nodeIdSet = new HashSet<>();
+        for (RelationshipData each : relationships) {
+            nodeIdSet.add(each.startNode);
+            nodeIdSet.add(each.endNode);
         }
-        return Math.max(nodeIdSet.size(), relationshipsIdSet.size());
+        return searchSessionRepository.getNodesById(new LinkedList<>(nodeIdSet));
     }
 }

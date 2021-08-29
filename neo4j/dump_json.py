@@ -29,7 +29,8 @@ with open(nodes_file, 'w', encoding='utf8') as file:
             f' return'
             f' labels(n) as l,'
             f' properties(n) as p,'
-            f' id(n) as i')
+            f' id(n) as i'
+            f' order by id(n)')
         records = []
         print(f'dumping node data batch:{batch}, batch_size:{batch_size}')
         for each in tqdm.tqdm(node_rerecords):
@@ -65,6 +66,7 @@ with open(relationships_file, 'w', encoding='utf8') as file:
             f' id(startNode(r)) as s,'
             f' id(endNode(r)) as e,'
             f' properties(r) as p'
+            f' order by id(r)'
         )
         records = []
         print(f'dumping relationship data batch:{batch},'

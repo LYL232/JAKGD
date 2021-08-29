@@ -45,8 +45,8 @@
 </template>
 
 <script>
+import './table-common.css'
 import GraphWindow from '../../../class/GraphWindow'
-
 import '../../../class/GraphWindow.css'
 
 export default {
@@ -260,20 +260,5 @@ export default {
 </script>
 
 <style scoped>
-
-.card {
-  width: 100%;
-  margin-right: auto;
-  margin-left: auto;
-  margin-top: 10px;
-  bottom: 10px;
-  padding: 10px;
-}
-
-.clear-fix:before,
-.clear-fix:after {
-  display: table;
-  content: "";
-}
 
 </style>

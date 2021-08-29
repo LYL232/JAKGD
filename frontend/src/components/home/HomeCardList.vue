@@ -1,5 +1,5 @@
 <template>
-  <div class="card-view">
+  <div style="width: 70%;margin-left: auto;margin-right: auto;margin-bottom: 40px;">
     <div v-for="item in cards" :key="item.id">
       <graph-card
           v-if="item.cardType === 'graph'"
@@ -7,9 +7,14 @@
           :card-id="item.id"
           :card-title="item.cardTitle"
           @card-close="onCardClose"/>
-      <graph-data-table-card
-          v-if="item.cardType === 'graph-data-table'"
-          :card-id="item.id" :graph-data="item.cardData"
+      <search-result-tables-card
+          v-if="item.cardType === 'search-result-table'"
+          :card-id="item.id" :card-data="item.cardData"
+          :card-title="item.cardTitle"
+          @card-close="onCardClose"/>
+      <mine-creation-card
+          v-if="item.cardType === 'mine-creation'"
+          :card-id="item.id" :card-data="item.cardData"
           :card-title="item.cardTitle"
           @card-close="onCardClose"/>
     </div>
@@ -21,7 +26,8 @@ import {defineAsyncComponent} from 'vue'
 // 首页优先加载图展示组件
 import GraphCard from './card/GraphCard.vue'
 
-const GraphDataTableCard = defineAsyncComponent(() => import( './card/GraphDataTableCard.vue'))
+const SearchResultTablesCard = defineAsyncComponent(() => import( './card/SearchResultTablesCard.vue')),
+    MineCreationCard = defineAsyncComponent(() => import( './card/MineCreationCard.vue'))
 
 export default {
   name: 'CardList',
@@ -48,8 +54,9 @@ export default {
     })
   },
   components: {
-    GraphDataTableCard,
+    SearchResultTablesCard,
     GraphCard,
+    MineCreationCard
   },
   methods: {
     /**
@@ -72,10 +79,4 @@ export default {
 </script>
 
 <style scoped>
-.card-view {
-  width: 70%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 40px;
-}
 </style>

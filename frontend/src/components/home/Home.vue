@@ -1,37 +1,42 @@
 <template>
-  <div>
-    <el-container class="header">
-      <el-container>
-        <img alt="home-logo" src="../../assets/home-logo.png" id="home-logo"/>
-        <el-avatar class="header-items" v-if="username">{{ username }}</el-avatar>
-        <el-button v-if="!username || username === ''"
-                   class="header-items" type="primary" icon="el-icon-user"
-                   @click="clickUserButton" circle/>
-        <el-button-group class="header-items" v-if="username">
-          <el-button class="header-items" type="primary" icon="el-icon-setting"
-                     @click="toMe()" round/>
-          <el-button type="primary" icon="el-icon-circle-plus"
-                     @click="clickCreateNodeButton" round/>
-          <el-button type="warning" @click="clickLogoutButton" round>注销
-          </el-button>
-        </el-button-group>
+  <el-container>
+    <el-header class="header">
+      <el-container style="align-items:center">
+        <el-col :span="18">
+          <img alt="home-logo" src="../../assets/home-logo.png" id="home-logo" class="header-items"/>
+          <el-avatar class="header-items" v-if="username">{{ username }}</el-avatar>
+          <el-button v-if="!username || username === ''"
+                     class="header-items" type="primary" icon="el-icon-user"
+                     @click="clickUserButton" circle/>
+          <el-button-group class="header-items" v-if="username">
+            <el-button class="header-items" type="primary" icon="el-icon-user"
+                       @click="toMe()" round>个人中心
+            </el-button>
+            <el-button type="primary" icon="el-icon-document-copy"
+                       @click="clickMyCreationButton" round/>
+            <el-button type="primary" icon="el-icon-circle-plus"
+                       @click="clickCreateNodeButton" round/>
+            <el-button type="warning" icon="el-icon-circle-close" @click="clickLogoutButton" round>注销
+            </el-button>
+          </el-button-group>
+        </el-col>
+        <el-col :span="6">
+          <el-input prefix-icon="el-icon-search"
+                    class="search-input"
+                    placeholder="id, 标签, 摘要"
+                    v-model="searchString"
+                    clearable>
+            <template #append>
+              <el-button @click="clickSearchButton"
+                         icon="el-icon-search" :loading="searchButtonLoading"/>
+            </template>
+          </el-input>
+        </el-col>
       </el-container>
-      <el-input prefix-icon="el-icon-search" class="search-input header-items" placeholder="id, 标签, 摘要"
-                v-model="searchString"
-                clearable>
-        <template #append>
-          <el-button @click="clickSearchButton"
-                     icon="el-icon-search" :loading="searchButtonLoading"/>
-        </template>
-      </el-input>
-
-    </el-container>
-    <div>
+    </el-header>
+    <el-main style="border: 1px solid #eee;">
       <el-tabs v-model="currentTabName" type="card" @tab-remove="removeTab">
-        <el-tab-pane
-            :name="mainTabName"
-            :closable=false
-        >
+        <el-tab-pane :name="mainTabName" :closable=false>
           <template #label>
             <span><i class="el-icon-share"></i> 主页</span>
           </template>
@@ -48,19 +53,20 @@
           <node-view v-if="item.type === 'node-view'" :node-id="item.node.id"/>
         </el-tab-pane>
       </el-tabs>
-      <el-divider/>
-      <el-footer class="footer">
-        <p style="font-size: 5px; float: right;">
-          ©Copyright 2021 LYL232 版权所有
-        </p>
-      </el-footer>
-    </div>
+    </el-main>
+    <el-divider/>
+    <el-footer class="footer">
+      <p style="font-size: 5px; float: right;">
+        ©Copyright 2021 LYL232 版权所有
+      </p>
+    </el-footer>
     <login-dialog ref="loginDialog"></login-dialog>
     <edit-node-dialog ref="editNodeDialog" @created="nodeCreated"></edit-node-dialog>
-  </div>
+  </el-container>
 </template>
 
 <script>
+import '../main-page.css'
 import {defineAsyncComponent} from 'vue'
 import {useRouter} from 'vue-router'
 // 首页优先加载图展示组件, 该组件在CardList中
@@ -91,7 +97,6 @@ export default {
   },
   setup() {
     const router = useRouter(), toMe = (() => {
-      console.log('!!!')
       router.push('/me')
     })
     return {
@@ -203,7 +208,6 @@ export default {
       }
     },
     clickLogoutButton() {
-
       this.$confirm('确认注销?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -217,31 +221,135 @@ export default {
         })
       }).catch(() => {
       })
-
     },
     clickSearchButton() {
       this.searchButtonLoading = true
-      this.axios.post('/api/search', {
-        key: this.searchString,
-        limit: (!this.searchString || this.searchString === '') ? 25 : 1000,
-        queryProperties: JSON.stringify(['description', 'name', 'summary']),
-      }).then(response => {
-        this.searchButtonLoading = false
-        let data = response.data, totLength = data.nodes.length,
-            newHomeCard = {
-              cardData: data,
-              cardTitle: this.searchString !== '' ? '搜索结果: ' + this.searchString : '',
-            }
-        if (totLength > 35 && this.searchString && this.searchString !== '') {
-          newHomeCard.cardType = 'graph-data-table'
+      if (this.searchString === '') {
+        this.axios.get(
+            '/api/search', {params: {limit: 25}}
+        ).then((response) => {
+          this.bus.$emit('addHomeCard', {
+            cardData: response.data,
+            cardTitle: '',
+            cardType: 'graph'
+          })
+          this.searchButtonLoading = false
+        }).catch((err) => {
+          this.searchButtonLoading = false
+          this.util.errorHint(err, '获取搜索信息失败')
+        })
+        return
+      }
+      this.querySearchResultCount(this.searchString)
+    },
+    querySearchResultCount(key) {
+      let queryProperties = JSON.stringify(['description', 'name', 'summary'])
+      this.axios.all([
+        this.axios.post('/api/search/node/property/count', {key, queryProperties}),
+        this.axios.post('/api/search/node/label/count', {key}),
+        this.axios.post('/api/search/relationship/property/count', {key, queryProperties}),
+        this.axios.post('/api/search/relationship/type/count', {key}),
+      ]).then(this.axios.spread((resNodeProperty, resNodeLabel, resRelProperty, resRelType) => {
+        let resultCount = resNodeProperty.data + resNodeLabel.data + resRelProperty.data + resRelType.data,
+            newHomeCard = {cardTitle: '搜索结果: ' + this.searchString}
+        if (resultCount > 35) {
+          newHomeCard.cardType = 'search-result-table'
+          newHomeCard.cardData = {
+            nodeInPropertyCount: resNodeProperty.data,
+            nodeInLabelCount: resNodeLabel.data,
+            relationshipInPropertyCount: resRelProperty.data,
+            relationshipInTypeCount: resRelType.data,
+            requestParam: {queryProperties, key},
+            key,
+          }
+          this.bus.$emit('addHomeCard', newHomeCard)
+          this.searchButtonLoading = false
         } else {
           newHomeCard.cardType = 'graph'
+          let skip = 0, limit = 1000, requestList = []
+          if (resNodeProperty.data > 0) {
+            requestList.push(this.axios.post(
+                '/api/search/node/property',
+                {key: this.searchString, queryProperties, skip, limit}
+            ))
+          }
+          if (resNodeLabel.data > 0) {
+            requestList.push(this.axios.post(
+                '/api/search/node/label',
+                {key: this.searchString, skip, limit}
+            ))
+          }
+          if (resRelProperty.data > 0) {
+            requestList.push(this.axios.post(
+                '/api/search/relationship/property',
+                {key: this.searchString, queryProperties, skip, limit}
+            ))
+          }
+          if (resRelType.data > 0) {
+            requestList.push(this.axios.post(
+                '/api/search/relationship/type',
+                {key: this.searchString, skip, limit}
+            ))
+          }
+          if (requestList.length === 0) {
+            newHomeCard.cardData = {nodes: [], relationships: []}
+            this.bus.$emit('addHomeCard', newHomeCard)
+            this.searchButtonLoading = false
+          } else {
+            this.axios.all(requestList).then((resList) => {
+              let nodes = [], relationships = [], nodeIdSet = new Set(), relationshipIdSet = new Set()
+              resList.forEach(res => {
+                if (res.data.nodes) {
+                  res.data.nodes.forEach(node => {
+                    if (!nodeIdSet.has(node.id)) {
+                      nodeIdSet.add(node.id)
+                      nodes.push(node)
+                    }
+                  })
+                }
+                if (res.data.relationships) {
+                  res.data.relationships.forEach(rel => {
+                    if (!relationshipIdSet.has(rel.id)) {
+                      relationshipIdSet.add(rel.id)
+                      relationships.push(rel)
+                    }
+                  })
+                }
+              })
+              newHomeCard.cardData = {nodes, relationships}
+              this.bus.$emit('addHomeCard', newHomeCard)
+              this.searchButtonLoading = false
+            }).catch(err => {
+              this.searchButtonLoading = false
+              this.util.errorHint(err, '获取搜索结果数据信息失败')
+            })
+          }
         }
-
-        this.bus.$emit('addHomeCard', newHomeCard)
-      }).catch(err => {
+      })).catch((err) => {
         this.searchButtonLoading = false
-        this.util.errorHint(err, '获取搜索信息失败')
+        this.util.errorHint(err, '获取搜索结果个数信息失败')
+      })
+    },
+    clickMyCreationButton() {
+      let requestBody = {
+        key: this.globalData.user.username,
+        queryProperties: "[\"author\"]"
+      }
+      this.axios.all([
+        this.axios.post('/api/search/node/property/count', requestBody),
+        this.axios.post('/api/search/relationship/property/count', requestBody)
+      ]).then(this.axios.spread((nodeRes, relRes) => {
+        this.bus.$emit('addHomeCard', {
+          cardTitle: '我创建的实体',
+          cardData: {
+            nodeCount: nodeRes.data,
+            relationshipCount: relRes.data,
+            requestBody
+          },
+          cardType: 'mine-creation'
+        })
+      })).catch(err => {
+        this.util.errorHint(err, '获取我创建的实体个数信息失败')
       })
     },
     nodeCreated(nodeId) {
@@ -267,25 +375,8 @@ export default {
 </script>
 
 <style scoped>
-.header {
-  box-shadow: lightblue 0 0 0 1px;
-  height: auto;
-  padding: 20px 15%;
-}
-
 .search-input {
   width: auto;
   height: 40px;
-}
-
-.header-items {
-  margin: auto 5px;
-}
-
-#home-logo {
-  width: 100px;
-  height: 75px;
-  max-width: 100%;
-  max-height: 100%;
 }
 </style>

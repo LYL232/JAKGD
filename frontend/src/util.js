@@ -27,6 +27,7 @@ export default {
         title: '请求错误',
         message: hint + ': 未知错误',
       })
+      console.log(err)
     }
   },
   /**

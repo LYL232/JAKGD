@@ -86,7 +86,7 @@ public class NodeController extends BaseController {
     @GetMapping("/{id}/neighborhood")
     public JSONObject getNeighborhood(
             @PathVariable Long id,
-            @RequestParam(required = false, defaultValue = "1000") Integer limit)
+            @RequestParam(required = false, defaultValue = "1000") Long limit)
             throws ObjectNotFoundException {
         return nodeService.getNeighbourhood(id, Math.min(limit, 1000), false);
     }
@@ -94,7 +94,7 @@ public class NodeController extends BaseController {
     @GetMapping("/{id}/neighborhood/direct")
     public JSONObject getDirectNeighborhood(
             @PathVariable Long id,
-            @RequestParam(required = false, defaultValue = "1000") Integer limit)
+            @RequestParam(required = false, defaultValue = "1000") Long limit)
             throws ObjectNotFoundException {
         return nodeService.getNeighbourhood(id, Math.min(limit, 1000), true);
     }

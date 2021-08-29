@@ -1,0 +1,17 @@
+.header {
+    box-shadow: lightblue 0 0 0 1px;
+    height: auto;
+    padding: 20px 15%;
+}
+
+.header-items {
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+#home-logo {
+    width: 100px;
+    height: 75px;
+    max-width: 100%;
+    max-height: 100%;
+}

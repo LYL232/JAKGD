@@ -88,7 +88,7 @@ public class NodeService extends BaseService {
      * @throws ObjectNotFoundException 找不到节点
      */
     @Transactional(readOnly = true)
-    public JSONObject getNeighbourhood(Long id, Integer limit, boolean direct)
+    public JSONObject getNeighbourhood(Long id, Long limit, boolean direct)
             throws ObjectNotFoundException {
         if (notExists(id)) {
             throw new ObjectNotFoundException("Node id: " + id);
