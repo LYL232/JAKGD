@@ -1,3 +1,5 @@
 create constraint on (n:__user) assert n.username is unique
 create index on :__document(type)
+create index on :__document(author)
+create index on :__knowledge(author)
 create index on :__permission(name)
