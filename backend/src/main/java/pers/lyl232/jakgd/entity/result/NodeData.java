@@ -9,12 +9,12 @@ import java.util.Set;
 public class NodeData {
     public Long id;
     public Set<String> labels;
-    public Map<String, String> properties;
+    public Map<String, Object> properties;
 
     public NodeData() {
     }
 
-    public NodeData(Long id, Set<String> labels, Map<String, String> properties) {
+    public NodeData(Long id, Set<String> labels, Map<String, Object> properties) {
         this.id = id;
         this.labels = labels;
         this.properties = properties;

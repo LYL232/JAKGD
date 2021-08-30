@@ -1,9 +1,11 @@
 package pers.lyl232.jakgd.service.relationship;
 
+import com.alibaba.fastjson.JSONObject;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.transaction.Transaction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pers.lyl232.jakgd.entity.result.NodeData;
 import pers.lyl232.jakgd.entity.result.RelationshipData;
 import pers.lyl232.jakgd.exception.ExceptionWithBriefJSONResponse;
 import pers.lyl232.jakgd.exception.ObjectNotFoundException;
@@ -13,6 +15,8 @@ import pers.lyl232.jakgd.repository.relationship.RelationshipRepository;
 import pers.lyl232.jakgd.repository.relationship.RelationshipSessionRepository;
 import pers.lyl232.jakgd.service.BaseService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +49,52 @@ public class RelationshipService extends BaseService {
     public RelationshipData getNotNull(Long id) throws ObjectNotFoundException {
         RelationshipData res = relationshipRepository.get(id);
         if (res == null) {
-            throw new ObjectNotFoundException("Relationship id: " + id);
+            throw new ObjectNotFoundException(String.format("Relationship id: %d", id));
         }
+        return res;
+    }
+
+    /**
+     * 获取关系及其关联的节点的详细数据，找不到抛出异常
+     *
+     * @param id 关系id
+     * @return {
+     * nodes: [{id, properties:..., label}]
+     * relationship: {id, properties:..., type}
+     * }
+     * @throws ObjectNotFoundException 找不到关系或其关联的节点时抛出
+     */
+    public JSONObject getDetail(Long id) throws ObjectNotFoundException {
+        JSONObject res = new JSONObject();
+        RelationshipData rel = relationshipRepository.get(id);
+        if (rel == null) {
+            res.put("msg", "no data");
+            return res;
+        }
+        Long[] idArr = {rel.startNode, rel.endNode};
+        List<NodeData> nodesData = nodeRepository.getNodesById(Arrays.asList(idArr));
+        boolean hasStartNode = false, hasEndNode = false;
+        for (NodeData node : nodesData) {
+            if (node.id.equals(rel.startNode)) {
+                hasStartNode = true;
+                continue;
+            }
+            if (node.id.equals(rel.endNode)) {
+                hasEndNode = true;
+            }
+        }
+        if (!hasStartNode) {
+            throw new ObjectNotFoundException(String.format(
+                    "Node id: %d which is Relationship-%d startNode",
+                    rel.startNode, rel.id));
+        }
+        if (!hasEndNode) {
+            throw new ObjectNotFoundException(String.format(
+                    "Node id: %d which is Relationship-%d endNode",
+                    rel.startNode, rel.id));
+        }
+        res.put("nodes", nodesData);
+        res.put("relationship", rel);
         return res;
     }
 

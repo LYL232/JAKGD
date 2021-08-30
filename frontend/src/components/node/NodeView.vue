@@ -283,7 +283,7 @@ export default {
     },
 
     clickDeleteButton() {
-      if (!this.$refs.nodeCardList.noCards()) {
+      if (this.$refs.nodeCardList && !this.$refs.nodeCardList.noCards()) {
         this.$notify.info({
           title: '操作错误',
           message: '要删除此节点, 需要先删除其所有的卡片',

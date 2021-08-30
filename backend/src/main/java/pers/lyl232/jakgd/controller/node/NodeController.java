@@ -10,6 +10,7 @@ import pers.lyl232.jakgd.exception.ObjectNotFoundException;
 import pers.lyl232.jakgd.service.node.NodeService;
 import pers.lyl232.jakgd.service.node.UserService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -44,6 +45,11 @@ public class NodeController extends BaseController {
     @GetMapping("/{id}")
     public NodeData get(@PathVariable Long id) throws ObjectNotFoundException {
         return nodeService.getNotNull(id);
+    }
+
+    @GetMapping("/find")
+    public List<NodeData> getList(@RequestParam List<Long> idList) {
+        return nodeService.getNodesById(idList);
     }
 
     @PutMapping("/{id}")

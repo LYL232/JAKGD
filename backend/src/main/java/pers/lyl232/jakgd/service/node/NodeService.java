@@ -73,6 +73,16 @@ public class NodeService extends BaseService {
     }
 
     /**
+     * 获取指定id在指定id列表里的节点数据，没有不报错
+     *
+     * @param idList id列表
+     * @return 找到的节点数据列表
+     */
+    public List<NodeData> getNodesById(List<Long> idList) {
+        return nodeRepository.getNodesById(idList);
+    }
+
+    /**
      * 获得某节点的邻域
      *
      * @param id    node id

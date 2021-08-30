@@ -116,7 +116,9 @@ save	保存，点击后触发save事件
         return
       }
 
-      text = text.replace(window.location.origin, '{{JAKGD_BACKEND_URL}}')
+      let originRegExp = new RegExp(window.location.origin, 'g')
+      text = text.replace(originRegExp, '{{JAKGD_BACKEND_URL}}')
+
 
       if (this.docId) {
         this.axios.put('/api/document/' + this.docId, {content: text}).then(() => {

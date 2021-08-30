@@ -188,6 +188,6 @@ public class SearchService {
             nodeIdSet.add(each.startNode);
             nodeIdSet.add(each.endNode);
         }
-        return searchSessionRepository.getNodesById(new LinkedList<>(nodeIdSet));
+        return searchSessionRepository.getNodesById(new ArrayList<>(nodeIdSet));
     }
 }

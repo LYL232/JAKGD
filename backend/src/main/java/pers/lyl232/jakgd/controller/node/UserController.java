@@ -11,7 +11,7 @@ import pers.lyl232.jakgd.exception.ExceptionWithBriefJSONResponse;
 import pers.lyl232.jakgd.exception.UnauthorizedException;
 import pers.lyl232.jakgd.service.node.UserService;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,7 @@ public class UserController extends BaseController {
 
     @GetMapping("/permission")
     public List<Permission> getPermissions() throws UnauthorizedException {
-        return new LinkedList<>(service.getPermissions(getAuthenticatedUsername()));
+        return new ArrayList<>(service.getPermissions(getAuthenticatedUsername()));
     }
 
     @GetMapping("/permission/{permission}")

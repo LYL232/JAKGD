@@ -34,7 +34,7 @@
         </el-col>
       </el-container>
     </el-header>
-    <el-main style="border: 1px solid #eee;">
+    <el-main style="border: 1px solid #eee;padding:0;">
       <el-tabs v-model="currentTabName" type="card" @tab-remove="removeTab">
         <el-tab-pane :name="mainTabName" :closable=false>
           <template #label>
@@ -251,8 +251,9 @@ export default {
         this.axios.post('/api/search/relationship/type/count', {key}),
       ]).then(this.axios.spread((resNodeProperty, resNodeLabel, resRelProperty, resRelType) => {
         let resultCount = resNodeProperty.data + resNodeLabel.data + resRelProperty.data + resRelType.data,
-            newHomeCard = {cardTitle: '搜索结果: ' + this.searchString}
-        if (resultCount > 35) {
+            newHomeCard = {cardTitle: '搜索结果: ' + key}
+        // 判断是不是整数，是整数就不用展示图了
+        if (resultCount > 35 || Number.isInteger(Number(key))) {
           newHomeCard.cardType = 'search-result-table'
           newHomeCard.cardData = {
             nodeInPropertyCount: resNodeProperty.data,
@@ -270,25 +271,25 @@ export default {
           if (resNodeProperty.data > 0) {
             requestList.push(this.axios.post(
                 '/api/search/node/property',
-                {key: this.searchString, queryProperties, skip, limit}
+                {key, queryProperties, skip, limit}
             ))
           }
           if (resNodeLabel.data > 0) {
             requestList.push(this.axios.post(
                 '/api/search/node/label',
-                {key: this.searchString, skip, limit}
+                {key, skip, limit}
             ))
           }
           if (resRelProperty.data > 0) {
             requestList.push(this.axios.post(
                 '/api/search/relationship/property',
-                {key: this.searchString, queryProperties, skip, limit}
+                {key, queryProperties, skip, limit}
             ))
           }
           if (resRelType.data > 0) {
             requestList.push(this.axios.post(
                 '/api/search/relationship/type',
-                {key: this.searchString, skip, limit}
+                {key, skip, limit}
             ))
           }
           if (requestList.length === 0) {
@@ -333,7 +334,7 @@ export default {
     clickMyCreationButton() {
       let requestBody = {
         key: this.globalData.user.username,
-        queryProperties: "[\"author\"]"
+        queryProperties: '["author"]'
       }
       this.axios.all([
         this.axios.post('/api/search/node/property/count', requestBody),

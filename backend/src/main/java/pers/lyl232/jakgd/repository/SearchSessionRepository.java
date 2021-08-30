@@ -285,10 +285,10 @@ public class SearchSessionRepository extends BaseSessionRepository {
      * @param record query Result object row
      * @return properties map
      */
-    private Map<String, String> getResultProperties(Map<String, Object> record) {
-        Map<String, String> properties = new HashMap<>();
+    private Map<String, Object> getResultProperties(Map<String, Object> record) {
+        Map<String, Object> properties = new HashMap<>();
         for (Map.Entry<?, ?> entry : ((Map<?, ?>) record.get("properties")).entrySet()) {
-            properties.put((String) entry.getKey(), (String) entry.getValue());
+            properties.put((String) entry.getKey(), entry.getValue());
         }
         return properties;
     }

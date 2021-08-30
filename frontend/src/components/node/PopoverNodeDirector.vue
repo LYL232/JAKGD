@@ -1,5 +1,5 @@
 <template>
-  <el-popover placement="left" trigger="click" v-model:visible="show">
+  <el-popover placement="auto" trigger="click" v-model:visible="show" width="400px">
     <div style="width: 400px">
       <el-col style="align-items: center">
         <el-table v-if="node" :data="nodeData">

@@ -1,5 +1,6 @@
 package pers.lyl232.jakgd.controller.relationship;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pers.lyl232.jakgd.controller.BaseController;
@@ -36,6 +37,12 @@ public class RelationshipController extends BaseController {
     public RelationshipData get(@PathVariable Long id)
             throws ExceptionWithBriefJSONResponse {
         return relationshipService.getNotNull(id);
+    }
+
+    @GetMapping("/detail/{id}")
+    public JSONObject getDetail(@PathVariable Long id)
+            throws ExceptionWithBriefJSONResponse {
+        return relationshipService.getDetail(id);
     }
 
     @PutMapping("/{id}")

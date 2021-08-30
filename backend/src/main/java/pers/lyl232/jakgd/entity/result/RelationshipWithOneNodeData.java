@@ -9,9 +9,9 @@ import java.util.Set;
 public class RelationshipWithOneNodeData {
     public Long id;
     public String type;
-    public Map<String, String> properties;
+    public Map<String, Object> properties;
     public Long otherNodeId;
     public Long nodeId;
     public Set<String> nodeLabels;
-    public Map<String, String> nodeProperties;
+    public Map<String, Object> nodeProperties;
 }

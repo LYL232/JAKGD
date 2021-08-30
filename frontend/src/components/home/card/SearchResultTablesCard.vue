@@ -12,6 +12,28 @@
         </el-col>
       </el-row>
     </template>
+    <div v-if="nodeByIdData.length > 0">
+      <h4>根据id找到的节点</h4>
+      <entity-table
+          entity-type="node"
+          :table-identity="'search-result-card-' + cardId + '-node-by-id'"
+          :nodeMap="nodeByIdMap"
+          :entity-data="nodeByIdData"
+          :loading="false"
+      />
+      <el-divider/>
+    </div>
+    <div v-if="relationshipByIdData.length > 0">
+      <h4>根据id找到的关系</h4>
+      <entity-table
+          entity-type="relationship"
+          :table-identity="'search-result-card-' + cardId + '-relationship-by-id'"
+          :nodeMap="relationshipByIdNodeMap"
+          :entity-data="relationshipByIdData"
+          :loading="false"
+      />
+      <el-divider/>
+    </div>
     <pagination-entity-table
         title="根据属性搜索到的节点" v-if="nodeInPropertyCount > 0"
         request-method="POST"
@@ -59,11 +81,12 @@
 import './table-common.css'
 import {defineAsyncComponent} from 'vue'
 
-const PaginationEntityTable = defineAsyncComponent(() => import('./PaginationEntityTable.vue'))
+const PaginationEntityTable = defineAsyncComponent(() => import('./PaginationEntityTable.vue')),
+    EntityTable = defineAsyncComponent(() => import('./EntityTable.vue'))
 
 export default {
   name: 'SearchResultTablesCard',
-  components: {PaginationEntityTable},
+  components: {PaginationEntityTable, EntityTable},
   data() {
     return {
       nodeInPropertyCount: 0,
@@ -72,7 +95,11 @@ export default {
       relationshipInTypeCount: 0,
       requestParam: {},
       key: '',
-      keyId: -1
+      keyId: -1,
+      nodeByIdMap: new Map(),
+      nodeByIdData: [],
+      relationshipByIdNodeMap: new Map(),
+      relationshipByIdData: [],
     }
   },
   props: {
@@ -90,6 +117,31 @@ export default {
     let keyId = Number(this.key)
     if (Number.isInteger(keyId) && keyId >= 0) {
       this.keyId = keyId
+      this.axios.get(
+          '/api/node/' + this.keyId
+      ).then(res => {
+        let node = res.data
+        this.nodeByIdData = [node]
+        this.nodeByIdMap.clear()
+        this.nodeByIdMap.set(node.id, node)
+      }).catch(err => {
+        this.util.errorHint(err, '按id搜索节点异常')
+      })
+      this.axios.get(
+          '/api/relationship/detail/' + this.keyId,
+      ).then(res => {
+        this.relationshipByIdData = []
+        this.relationshipByIdNodeMap.clear()
+        if (res.data.relationship) {
+          this.relationshipByIdData.push(res.data.relationship)
+          this.relationshipByIdNodeMap.clear()
+          res.data.nodes.forEach(node => {
+            this.relationshipByIdNodeMap.set(node.id, node)
+          })
+        }
+      }).catch(err => {
+        this.util.errorHint(err, '按id搜索关系异常')
+      })
     }
   },
   methods: {

@@ -8,7 +8,7 @@ import java.util.Map;
 public class RelationshipData {
     public Long id;
     public String type;
-    public Map<String, String> properties;
+    public Map<String, Object> properties;
     public Long startNode;
     public Long endNode;
 
@@ -17,7 +17,7 @@ public class RelationshipData {
     }
 
     public RelationshipData(
-            Long id, String type, Map<String, String> properties,
+            Long id, String type, Map<String, Object> properties,
             Long startNode, Long endNode) {
         this.id = id;
         this.type = type;
