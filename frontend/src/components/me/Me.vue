@@ -25,7 +25,8 @@
             <template #title><i class="el-icon-menu"></i>功能</template>
             <el-menu-item-group>
               <template #title><i class="el-icon-user"/>我的</template>
-              <el-menu-item index="my-image">我上传的图片</el-menu-item>
+              <el-menu-item index="my-file">我上传的文件</el-menu-item>
+              <el-menu-item index="my-unused-file">我未使用的文件</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
           <el-sub-menu index="settings">
@@ -39,7 +40,8 @@
       </el-aside>
       <el-main>
         <change-password-page v-if="menuIndex === 'change-password'"/>
-        <my-images-page v-if="menuIndex === 'my-image'"/>
+        <my-file-page v-if="menuIndex === 'my-file'"/>
+        <my-unused-file-page v-if="menuIndex === 'my-unused-file'"/>
       </el-main>
     </el-container>
     <el-divider/>
@@ -58,13 +60,15 @@ import {defineAsyncComponent} from 'vue'
 import {useRouter} from 'vue-router'
 
 const ChangePasswordPage = defineAsyncComponent(() => import( './ChangePasswordPage.vue')),
-    MyImagesPage = defineAsyncComponent(() => import( './MyImagesPage.vue'))
+    MyFilePage = defineAsyncComponent(() => import( './MyFilePage.vue')),
+    MyUnusedFilePage = defineAsyncComponent(() => import( './MyUnusedFilePage.vue'))
 
 export default {
   name: 'Me',
   components: {
     ChangePasswordPage,
-    MyImagesPage
+    MyFilePage,
+    MyUnusedFilePage
   },
   data() {
     return {

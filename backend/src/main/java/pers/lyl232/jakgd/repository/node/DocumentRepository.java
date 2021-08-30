@@ -63,4 +63,7 @@ public interface DocumentRepository extends Neo4jRepository<Document, Long> {
             "return id(m)")
     Long getPartOfNodeId(@Param("dId") Long dId);
 
+    @Query("match (n:__document) where n.author = $author and n.content contains($key) return count(n)")
+    Long getUserDocumentContain(@Param("author") String author, @Param("key")String key);
+
 }

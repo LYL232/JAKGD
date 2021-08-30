@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import pers.lyl232.jakgd.controller.BaseController;
 import pers.lyl232.jakgd.entity.node.Document;
 import pers.lyl232.jakgd.exception.ExceptionWithBriefJSONResponse;
+import pers.lyl232.jakgd.exception.InvalidParameterException;
 import pers.lyl232.jakgd.exception.ObjectNotFoundException;
+import pers.lyl232.jakgd.exception.ParameterMissingException;
 import pers.lyl232.jakgd.service.node.DocumentService;
 import pers.lyl232.jakgd.service.node.UserService;
 
@@ -129,6 +131,18 @@ public class DocumentController extends BaseController {
             }
         }
         return noContentResponse();
+    }
+
+    @GetMapping("/mine/contain")
+    Long searchCountInMineDocumentContains(@RequestParam String key) throws ExceptionWithBriefJSONResponse {
+        try {
+            if (key == null || key.isEmpty()) {
+                throw new ParameterMissingException("key: String cannot be empty");
+            }
+            return documentService.getUserDocumentContain(getAuthenticatedUsername(), key);
+        } catch (ClassCastException exception) {
+            throw new InvalidParameterException(exception.toString());
+        }
     }
 
 }

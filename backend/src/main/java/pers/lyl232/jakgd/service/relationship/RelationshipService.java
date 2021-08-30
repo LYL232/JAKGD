@@ -15,7 +15,6 @@ import pers.lyl232.jakgd.repository.relationship.RelationshipRepository;
 import pers.lyl232.jakgd.repository.relationship.RelationshipSessionRepository;
 import pers.lyl232.jakgd.service.BaseService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +63,7 @@ public class RelationshipService extends BaseService {
      * }
      * @throws ObjectNotFoundException 找不到关系或其关联的节点时抛出
      */
+    @Transactional(readOnly = true)
     public JSONObject getDetail(Long id) throws ObjectNotFoundException {
         JSONObject res = new JSONObject();
         RelationshipData rel = relationshipRepository.get(id);

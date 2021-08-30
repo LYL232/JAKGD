@@ -136,4 +136,15 @@ public class DocumentService extends BaseService {
             logger.error("unknown Document type internal: " + document.getType());
         }
     }
+
+    /**
+     * 获取用户文档中包含指定字符串的文档个数
+     *
+     * @param author 用户
+     * @param key    字符串
+     * @return 包含指定字符串的文档个数
+     */
+    public long getUserDocumentContain(String author, String key) {
+        return documentRepository.getUserDocumentContain(author, key);
+    }
 }

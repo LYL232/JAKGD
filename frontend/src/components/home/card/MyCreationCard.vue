@@ -42,7 +42,7 @@ import {defineAsyncComponent} from 'vue'
 const PaginationEntityTable = defineAsyncComponent(() => import('./PaginationEntityTable.vue'))
 
 export default {
-  name: 'MineCreationCard',
+  name: 'MyCreationCard',
   components: {
     PaginationEntityTable
   },

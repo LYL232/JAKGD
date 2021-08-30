@@ -12,7 +12,7 @@
           :card-id="item.id" :card-data="item.cardData"
           :card-title="item.cardTitle"
           @card-close="onCardClose"/>
-      <mine-creation-card
+      <my-creation-card
           v-if="item.cardType === 'mine-creation'"
           :card-id="item.id" :card-data="item.cardData"
           :card-title="item.cardTitle"
@@ -27,7 +27,7 @@ import {defineAsyncComponent} from 'vue'
 import GraphCard from './card/GraphCard.vue'
 
 const SearchResultTablesCard = defineAsyncComponent(() => import( './card/SearchResultTablesCard.vue')),
-    MineCreationCard = defineAsyncComponent(() => import( './card/MineCreationCard.vue'))
+    MyCreationCard = defineAsyncComponent(() => import( './card/MyCreationCard.vue'))
 
 export default {
   name: 'CardList',
@@ -56,7 +56,7 @@ export default {
   components: {
     SearchResultTablesCard,
     GraphCard,
-    MineCreationCard
+    MyCreationCard
   },
   methods: {
     /**

@@ -68,6 +68,7 @@ public class SearchService {
      * nodes: [{id, labels: [...], properties: {key:value...}}],
      * }
      */
+    @Transactional(readOnly = true)
     public JSONObject getSearchInNodePropertyResult(
             String key, Set<String> queryProperties, long skip, long limit) {
         return nodesResultWrapper(

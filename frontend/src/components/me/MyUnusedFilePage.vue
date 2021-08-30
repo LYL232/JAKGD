@@ -1,7 +1,7 @@
 <template>
-  <el-container>
-    <el-button type="primary" round>刷新</el-button>
-  </el-container>
+  <el-button-group>
+    <el-button type="primary" round @click="refresh">刷新</el-button>
+  </el-button-group>
   <el-divider/>
   <div style="text-align: center">
     <el-table :data="tableData" v-loading="loading">
@@ -24,37 +24,22 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-        style="margin-top: 10px"
-        @size-change="pageSizeChange"
-        @current-change="pageChange"
-        :current-page="page"
-        :page-sizes="[8, 16, 32, 64]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="fileRecords.length"
-        v-loading="loading"
-    />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'MyImagesPage',
+  name: 'MyUnusedFilePage',
   data() {
     return {
       fileRecords: [],
-      displayRecords: [],
       loading: false,
-      filePerRow: 6,
-      pageSize: 8,
-      page: 1,
     }
   },
   computed: {
     tableData() {
       let tableData = []
-      this.displayRecords.forEach(path => {
+      this.fileRecords.forEach(path => {
         tableData.push({
           path,
           cutPath: path.replace('/' + this.globalData.user.username, ''),
@@ -63,13 +48,6 @@ export default {
       })
       return tableData
     },
-    totalPages() {
-      let totPages = Math.floor(this.fileRecords.length / this.pageSize)
-      if (totPages * this.pageSize < this.fileRecords.length) {
-        return totPages + 1
-      }
-      return totPages
-    }
   },
   mounted() {
     this.refresh()
@@ -77,41 +55,31 @@ export default {
   methods: {
     refresh() {
       this.loading = true
+      this.fileRecords = []
       this.axios.get(
           '/api/file'
       ).then(res => {
-        this.loading = false
-        this.fileRecords = res.data
-        if (this.fileRecords.length > 0) {
-          this.pageChange(1)
+        let allFiles = res.data
+        if (allFiles.length === 0) {
+          return
         }
+        this.loading = false
+        allFiles.forEach(path => {
+          this.axios.get(
+              '/api/document/mine/contain', {params: {key: path}}
+          ).then(res => {
+            if (res.data > 0) {
+              return
+            }
+            this.fileRecords.push(path)
+          }).catch(err => {
+            this.util.errorHint(err, '判断文档中是否使用文件: ' + path + ' 失败')
+          })
+        })
       }).catch(err => {
         this.loading = false
         this.util.errorHint(err, '获取图片文件信息失败')
       })
-    },
-    pageSizeChange(newSize) {
-      newSize = Number(newSize)
-      if (!Number.isInteger(newSize) || newSize <= 0) {
-        //todo: warning
-        return
-      }
-      if (newSize === this.pageSize) {
-        return
-      }
-      this.pageSize = newSize
-    },
-    pageChange(page) {
-      if (page <= 0 || page > this.totalPages) {
-        // todo: warning
-        return
-      }
-      let base = (page - 1) * this.pageSize, displayRecords = []
-      for (let i = 0; i < this.pageSize && i + base < this.fileRecords.length; ++i) {
-        displayRecords.push(this.fileRecords[i + base])
-      }
-      this.displayRecords = displayRecords
-      this.page = page
     },
     clickDeleteButton(path) {
       this.$confirm('永久删除该文件?', '确认删除', {
@@ -123,7 +91,12 @@ export default {
         this.axios.delete(
             '/api/file', {params: {path}}
         ).then(() => {
-          this.refresh()
+          for (let i = 0; i < this.fileRecords.length; ++i) {
+            if (this.fileRecords[i] === path) {
+              this.fileRecords.splice(i, 1)
+              break
+            }
+          }
           this.$notify({
             title: '成功',
             type: 'success',
@@ -134,8 +107,8 @@ export default {
           this.loading = false
           this.util.errorHint(err, '删除文件: ' + path + ' 失败')
         })
-      }).catch()
-    }
+      }).catch(() => {})
+    },
   }
 }
 </script>

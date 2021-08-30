@@ -51,7 +51,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("node/label")
+    @PostMapping("/node/label")
     JSONObject searchInNodeLabel(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
@@ -63,7 +63,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("node/label/count")
+    @PostMapping("/node/label/count")
     Long searchCountInNodeLabel(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
@@ -75,7 +75,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("relationship/property")
+    @PostMapping("/relationship/property")
     JSONObject searchInRelationshipProperty(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
@@ -88,7 +88,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("relationship/property/count")
+    @PostMapping("/relationship/property/count")
     Long searchCountInRelationshipProperty(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
@@ -100,7 +100,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("relationship/type")
+    @PostMapping("/relationship/type")
     JSONObject searchInRelationshipType(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
@@ -112,7 +112,7 @@ public class SearchController extends BaseController {
         }
     }
 
-    @PostMapping("relationship/type/count")
+    @PostMapping("/relationship/type/count")
     Long searchCountInRelationshipType(
             @RequestBody Map<String, Object> body) throws ExceptionWithBriefJSONResponse {
         try {
