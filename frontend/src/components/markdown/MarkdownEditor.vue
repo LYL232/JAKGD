@@ -156,6 +156,11 @@ save	保存，点击后触发save事件
             width: 'auto',
             height: 'auto',
           })
+          this.$notify({
+            title: '上传成功',
+            type: 'success',
+            message: '文件上传成功',
+          })
         }).catch(err => {
           this.util.errorHint(err, '图片' + file.name + '上传失败')
         })

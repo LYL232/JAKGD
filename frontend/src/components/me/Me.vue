@@ -25,6 +25,7 @@
             <template #title><i class="el-icon-menu"></i>功能</template>
             <el-menu-item-group>
               <template #title><i class="el-icon-user"/>我的</template>
+              <el-menu-item index="my-image">我上传的图片</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
           <el-sub-menu index="settings">
@@ -38,6 +39,7 @@
       </el-aside>
       <el-main>
         <change-password-page v-if="menuIndex === 'change-password'"/>
+        <my-images-page v-if="menuIndex === 'my-image'"/>
       </el-main>
     </el-container>
     <el-divider/>
@@ -55,10 +57,15 @@ import '../main-page.css'
 import {defineAsyncComponent} from 'vue'
 import {useRouter} from 'vue-router'
 
-const ChangePasswordPage = defineAsyncComponent(() => import( './ChangePasswordPage.vue'))
+const ChangePasswordPage = defineAsyncComponent(() => import( './ChangePasswordPage.vue')),
+    MyImagesPage = defineAsyncComponent(() => import( './MyImagesPage.vue'))
 
 export default {
   name: 'Me',
+  components: {
+    ChangePasswordPage,
+    MyImagesPage
+  },
   data() {
     return {
       username: null,
@@ -114,9 +121,7 @@ export default {
       this.menuIndex = index
     },
   },
-  components: {
-    ChangePasswordPage
-  }
+
 }
 </script>
 
