@@ -74,6 +74,7 @@
         entity-type="relationship"
         :table-identity="'search-result-card-' + cardId + '-in-relationship-type'"
     />
+    <span v-if="hasData">没有数据</span>
   </el-card>
 </template>
 
@@ -87,6 +88,13 @@ const PaginationEntityTable = defineAsyncComponent(() => import('./PaginationEnt
 export default {
   name: 'SearchResultTablesCard',
   components: {PaginationEntityTable, EntityTable},
+  computed: {
+    hasData() {
+      return this.nodeInPropertyCount === 0 && this.nodeInLabelCount === 0 &&
+          this.relationshipInPropertyCount === 0 && this.relationshipInTypeCount === 0 &&
+          this.nodeByIdData.length === 0 && this.relationshipByIdData.length === 0
+    }
+  },
   data() {
     return {
       nodeInPropertyCount: 0,
@@ -125,7 +133,10 @@ export default {
         this.nodeByIdMap.clear()
         this.nodeByIdMap.set(node.id, node)
       }).catch(err => {
-        this.util.errorHint(err, '按id搜索节点异常')
+        if (err.response.status !== 404) {
+          // 404就不用处理
+          this.util.errorHint(err, '按id搜索节点异常')
+        }
       })
       this.axios.get(
           '/api/relationship/detail/' + this.keyId,
@@ -140,7 +151,10 @@ export default {
           })
         }
       }).catch(err => {
-        this.util.errorHint(err, '按id搜索关系异常')
+        if (err.response.status !== 404) {
+          // 404就不用处理
+          this.util.errorHint(err, '按id搜索关系异常')
+        }
       })
     }
   },
