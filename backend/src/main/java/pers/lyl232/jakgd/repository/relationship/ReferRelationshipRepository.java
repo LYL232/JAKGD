@@ -29,7 +29,7 @@ public interface ReferRelationshipRepository extends
     @Query("match (n)-[r:__refer]->(o) " +
             "where id(n) = $id with n, r, o " +
             "match (m)-[:__refer*1..]->(o) " +
-            "where id(m) = $referId with r" +
+            "where id(m) = $referId " +
             "delete r")
     void deleteDuplicateReferRelationships(@Param("id") Long id, @Param("referId") Long referId);
 
