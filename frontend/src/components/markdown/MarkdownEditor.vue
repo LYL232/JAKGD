@@ -4,14 +4,16 @@
     <el-divider></el-divider>
     <v-md-editor class="md-div" v-model="content" ref="editor" @save="save"
                  :left-toolbar="leftToolbar" :disabled-menus="disabledMenus"
-                 @upload-image="handleUploadImage"
+                 @upload-image="handleUploadImage" @change="handleChange"
     />
-    <!--                 :toolbars="toolbars" @imgAdd="imgAdd" @imgDel="imgDel"-->
   </div>
 </template>
 
 <script>
 import './md-common.css'
+
+const originRegExp = new RegExp(window.location.origin, 'g'),
+    backEndRegExp = new RegExp('\{\{JAKGD_BACKEND_URL\}\}', 'g')
 
 export default {
   name: 'MarkdownEditor',
@@ -29,25 +31,25 @@ export default {
   data() {
     return {
       docId: null,
-      content: this.doc.content.replace('{{JAKGD_BACKEND_URL}}', window.location.origin),
+      content: this.doc.content.replace(backEndRegExp, window.location.origin),
       leftToolbar: 'undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | save',
       /*
-undo	撤销
-redo	重做
-clear	清空
-h	标题
-bold	粗体
-italic	斜体
-strikethrough	中划线
-quote	引用
-ul	无序列表
-ol	有序列表
-table	表格
-hr	分割线
-link	链接
-image	插入图片
-code	代码块
-save	保存，点击后触发save事件
+        undo	撤销
+        redo	重做
+        clear	清空
+        h	标题
+        bold	粗体
+        italic	斜体
+        strikethrough	中划线
+        quote	引用
+        ul	无序列表
+        ol	有序列表
+        table	表格
+        hr	分割线
+        link	链接
+        image	插入图片
+        code	代码块
+        save	保存，点击后触发save事件
       * */
       toolbarConfig: {},
       disabledMenus: [],
@@ -116,9 +118,7 @@ save	保存，点击后触发save事件
         return
       }
 
-      let originRegExp = new RegExp(window.location.origin, 'g')
       text = text.replace(originRegExp, '{{JAKGD_BACKEND_URL}}')
-
 
       if (this.docId) {
         this.axios.put('/api/document/' + this.docId, {content: text}).then(() => {
@@ -167,28 +167,12 @@ save	保存，点击后触发save事件
           this.util.errorHint(err, '图片' + file.name + '上传失败')
         })
       })
-      // 此处只做示例
-      // insertImage({
-      //   url:
-      //       'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1269952892,3525182336&fm=26&gp=0.jpg',
-      //   desc: '七龙珠',
-      //   width: 'auto',
-      //   height: 'auto',
-      // });
     },
-    imgDel(pos) {
-      pos[0] = pos[0].toString()
-      if (pos[0].startsWith(window.location.origin + '/media')) {
-        let path = pos[0].replace(window.location.origin + '/media', '')
-        this.axios.delete('/api/file', {
-          params: {path},
-        }).then(() => {
-          this.$refs.editor.$refs.toolbar_left.$imgDelByFilename(pos[0])
-        }).catch(err => {
-          this.util.errorHint(err, '图片删除失败')
-        })
-      }
-    },
+    handleChange() {
+      setTimeout(() => {
+        window.MathJax.typesetPromise()
+      }, 250)
+    }
   },
 }
 </script>

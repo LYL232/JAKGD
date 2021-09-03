@@ -4,12 +4,13 @@
 
 <script>
 import './md-common.css'
+const backEndRegExp = new RegExp('\{\{JAKGD_BACKEND_URL\}\}', 'g')
 
 export default {
   name: 'MarkdownBlock',
   computed: {
     content() {
-      return this.mdContent.replace('{{JAKGD_BACKEND_URL}}', window.location.origin)
+      return this.mdContent.replace(backEndRegExp, window.location.origin)
     }
   },
   props: {
