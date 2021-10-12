@@ -20,16 +20,30 @@ public interface ReferRelationshipRepository extends
     Integer queryIfHasReferred(@Param("id") Long id, @Param("queryId") Long queryId);
 
     /**
-     * 即将添加某个引用关系时, 检查引用者所有直接引用的节点, 如果将要引用的节点对这些节点具有可达性，
-     * 那么需要删除这些节点
+     * 即将添加某个引用关系时, 检查引用者所有直接引用的节点, 如果这些节点对将被引用的节点具有引用关系,
+     * 那么需要删除这些节点对将被引用节点的关系
      *
      * @param id      referrer id
      * @param referId reference id
      */
-    @Query("match (n:__knowledge)-[r:__refer]->(o:__knowledge) " +
+    @Query("match (n)-[r:__refer]->(o) " +
             "where id(n) = $id with n, r, o " +
-            "match (m:__knowledge)-[:__refer*1..]->(o:__knowledge) " +
-            "where id(m) = $referId " +
+            "match (m)-[:__refer*1..]->(o) " +
+            "where id(m) = $referId with r" +
             "delete r")
     void deleteDuplicateReferRelationships(@Param("id") Long id, @Param("referId") Long referId);
+
+    /**
+     * 即将添加某个引用关系时, 检查引用者所有引用的节点, 如果这些节点对将被引用节点有引用关系,
+     * 那么需要删除这些节点对将被引用节点的关系
+     *
+     * @param id      referrer id
+     * @param referId reference id
+     */
+    @Query("match (o)-[:__refer*1..]->(n) " +
+            "where id(n) = $id with o " +
+            "match (o)-[r:__refer]->(m) " +
+            "where id(m) = $referId " +
+            "delete r")
+    void deleteRefererDuplicateReferRelationships(@Param("id") Long id, @Param("referId") Long referId);
 }

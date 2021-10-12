@@ -31,6 +31,7 @@ public class ReferRelationshipService extends BaseService {
             throw new ExceptionWithBriefJSONResponse(BriefJSONResponse.Code.SELF_REFER);
         }
         referRelationshipRepository.deleteDuplicateReferRelationships(id, referId);
+        referRelationshipRepository.deleteRefererDuplicateReferRelationships(id, referId);
         referRelationshipRepository.create(id, referId, getFormatNowDateStringBySecond());
     }
 
