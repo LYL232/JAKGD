@@ -114,7 +114,9 @@ window.MathJax.config = {
   },
   tags: 'all', // 为方程式编号
   tagSide: 'left', // 方程式编号的位置
+  loader: {load: ['[tex]/mathtools', '[tex]/cases', '[tex]/ams']},
   tex: {
+    packages: {'[+]': ['mathtools', 'cases', 'ams']},
     processEscapes: true,
     processEnvironments: true, // process \begin{xxx}...\end{xxx} outside math mode
     processRefs: true, // process \ref{...} outside of math mode
